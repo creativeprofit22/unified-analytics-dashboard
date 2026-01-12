@@ -5,6 +5,7 @@
 export { MetricCard, type MetricCardProps } from "./MetricCard";
 export { TrendChart, type TrendDataPoint } from "./TrendChart";
 export { CategorySection } from "./CategorySection";
+export { TimeRangePicker, type TimeRangePickerProps } from "./TimeRangePicker";
 
 // Dashboard with all sections and shared components
 export { Dashboard } from "./dashboard";

@@ -23,7 +23,15 @@
 /**
  * Predefined time ranges for analytics filtering.
  */
-export type TimeRange = '7d' | '30d' | '90d' | '1y' | 'all';
+export type TimeRange = '7d' | '30d' | '90d' | '12m' | 'ytd' | 'custom';
+
+/**
+ * Custom date range for when TimeRange is 'custom'.
+ */
+export interface CustomDateRange {
+  start: Date;
+  end: Date;
+}
 
 /**
  * Direction of metric change between periods.

@@ -1,24 +1,44 @@
 # Unified Analytics Dashboard
 
 ## Pipeline State
-Phase: refactor-hunt
-Feature: Dashboard UI Components
-Files-Validated: MetricCard.tsx, TrendChart.tsx, CategorySection.tsx, Dashboard.tsx, page.tsx
-Validation-Report: reports/validation-dashboard-ui.md
+Phase: build
+Feature: Recharts Integration
+Features-Remaining: 9
+
+## UI Roadmap
+
+### In Progress
+- **Recharts Integration** - Replace custom SVG TrendChart with interactive Recharts
+
+### Pending (Priority Order)
+1. **Interactive Tooltips** - Hover states on charts showing exact values, dates
+2. **Comparison Mode** - Period-over-period UI (vs last 30d, vs last year)
+3. **Source/Segment Filters** - Filter dashboard by traffic source, campaign, segment
+4. **Table Search/Filter** - Search and sort within DataTable components
+5. **Export (CSV/PDF)** - Download reports functionality
+6. **Real-time Updates** - WebSocket/polling for live data refresh
+7. **Embed Mode** - iframe-optimized view with postMessage API
+8. **Authentication** - JWT/session management for production
+9. **Settings Page** - User preferences (theme, default time range, etc.)
 
 ## Last Session (2026-01-12)
-**Feature**: Dashboard UI Components - VALIDATED
+**Feature**: Time Range UI Selector - BUILT
+- Created TimeRangePicker.tsx with presets (7D/30D/90D/12M/YTD/Custom)
+- Extended TimeRange type to include 'ytd', '12m', 'custom'
+- Added CustomDateRange interface
+- Integrated with page.tsx state management
+- Mobile-responsive (dropdown on mobile, button group on desktop)
+- TypeCheck: PASS
+
+## Previous Session (2026-01-12)
+**Feature**: Dashboard UI Components - VALIDATED & REFACTORED
 - Built: MetricCard, TrendChart, CategorySection, Dashboard (10 analytics categories)
-- Fixed 6 critical/high bugs:
-  - Type mismatch: useAnalytics/fetchers/api-client now use UnifiedAnalyticsData
-  - Division by zero: createMetric handles previous=0 correctly
-  - NaN handling: MetricCard and Dashboard handle non-finite values
-  - Memoization: MetricCard wrapped in React.memo, formatters cached
-  - Gradient ID collision: TrendChart uses unique IDs
-  - CSS fallbacks: All components have variable fallbacks
+- Fixed 6 critical/high bugs
+- Split 1040-line Dashboard.tsx into 10 section files + 4 shared components
 
 ## Completed Features
-- **Dashboard UI Components**: Built, validated (2026-01-12)
+- **Time Range UI Selector**: Built (2026-01-12)
+- **Dashboard UI Components**: Built, validated, refactored (2026-01-12)
 - **Complete Analytics Types**: Built 74 types, validated, refactored (2026-01-12)
 - **Data Hooks**: useAnalytics, usePlatformAnalytics, useHealthCheck (2026-01-12)
 
