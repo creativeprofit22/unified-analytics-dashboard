@@ -1,5 +1,5 @@
 import { analyticsClient, ApiError } from './api-client';
-import type { AnalyticsQueryParams, Platform, PlatformAnalyticsData, AnalyticsData } from '@/types';
+import type { AnalyticsQueryParams, Platform, PlatformAnalyticsData, AnalyticsData, HealthResponse } from '@/types';
 
 /**
  * SWR-compatible fetcher for analytics
@@ -28,6 +28,14 @@ export async function platformFetcher(
     throw new ApiError(response.error || 'Failed to fetch', 500);
   }
   return response.data;
+}
+
+/**
+ * Health check fetcher
+ * Usage: useSWR('health', healthCheckFetcher)
+ */
+export function healthCheckFetcher(): Promise<HealthResponse> {
+  return analyticsClient.healthCheck();
 }
 
 /**

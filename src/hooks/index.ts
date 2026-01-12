@@ -1,0 +1,17 @@
+/**
+ * Data fetching hooks for the analytics dashboard.
+ * Built on SWR for caching, revalidation, and request deduplication.
+ */
+
+// Main hooks
+export { useAnalytics, type UseAnalyticsParams, type UseAnalyticsReturn } from './useAnalytics';
+export { usePlatformAnalytics, type UsePlatformAnalyticsParams, type UsePlatformAnalyticsReturn } from './usePlatformAnalytics';
+export { useHealthCheck, type UseHealthCheckParams, type UseHealthCheckReturn } from './useHealthCheck';
+
+// Shared utilities and types
+export {
+  // Error utilities
+  ApiError,
+  isApiError,
+  getErrorMessage,
+} from './types';
