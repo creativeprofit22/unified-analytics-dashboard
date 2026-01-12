@@ -3,21 +3,118 @@
  * Re-exports all types from module files for convenient importing.
  */
 
-// Re-export all analytics types
+// =============================================================================
+// ANALYTICS TYPES (from ./analytics)
+// =============================================================================
+// Core shared types, traffic, SEO, conversions, revenue, subscriptions,
+// payments, unit economics, demographics, segmentation, and campaigns.
+
 export type {
-  Platform,
+  // Core Shared Types
   TimeRange,
   ChangeType,
   Metric,
-  OverviewStats,
   TrendDataPoint,
+  RevenueTrendDataPoint,
+
+  // Traffic & Acquisition (GA4)
+  TrafficSource,
+  CoreWebVitals,
+  TrafficMetrics,
+
+  // SEO Metrics
+  KeywordRanking,
+  SearchQuery,
+  TopOrganicPage,
+  SEOMetrics,
+
+  // Conversions & Funnel
+  SourceConversion,
+  MicroConversion,
+  FunnelStep,
+  TimeToConvert,
+  AssistedConversion,
+  ConversionMetrics,
+
+  // Revenue & Orders (Stripe)
+  ProductRevenue,
+  RevenueGrowth,
+  RevenueMetrics,
+
+  // Subscriptions & Retention
+  ChurnRate,
+  BaseCohort,
+  CohortWithMonths,
+  CohortRetention,
+  MRRMovement,
+  SubscriptionMetrics,
+
+  // Payments
+  RecoveryByAttempt,
+  CardsExpiring,
+  PaymentMetrics,
+
+  // Unit Economics
+  LTVCohort,
+  CustomerConcentration,
+  UnitEconomicsMetrics,
+
+  // Demographics
+  CountryData,
+  RegionData,
+  CityData,
+  GeographicData,
+  DeviceType,
+  DeviceData,
+  TechnologyData,
+  UserAttributesData,
+  SegmentConversion,
+  DemographicsMetrics,
+
+  // Segmentation
+  CampaignSegment,
+  NicheSegment,
+  CohortSegment,
+  PlanSegment,
+  BehaviorSegmentType,
+  BehaviorSegment,
+  LeadScoreData,
+  LifecycleData,
+  CrossSegmentComparison,
+  SegmentationMetrics,
+
+  // Campaigns (Email/SMS/WhatsApp)
+  CampaignChannel,
+  CampaignSummary,
+  CampaignEngagement,
+  CampaignConversions,
+  CampaignNegative,
+  ListHealth,
+  ChannelMetrics,
+  CampaignData,
+  CampaignMetrics,
+
+  // Unified Analytics Data
+  UnifiedAnalyticsData,
+} from "./analytics";
+
+// =============================================================================
+// LEGACY SOCIAL MEDIA TYPES (Backward Compatibility)
+// =============================================================================
+
+export type {
+  Platform,
+  OverviewStats,
   ContentItem,
   ProfileStats,
   PlatformBreakdown,
   AnalyticsData,
-} from "./analytics";
+} from "./analytics-legacy";
 
-// Re-export all API types
+// =============================================================================
+// API TYPES
+// =============================================================================
+
 export type {
   ApiResponse,
   AnalyticsQueryParams,
@@ -26,36 +123,26 @@ export type {
   ConnectPlatformRequest,
   PaginatedResponse,
   PaginationParams,
+  PlatformAnalyticsData,
+  HealthResponse,
 } from "./api";
 
-// Additional types for API routes
+// =============================================================================
+// RESPONSE TYPES
+// =============================================================================
 
-/**
- * Response structure for aggregated analytics endpoint.
- */
-export type AnalyticsResponse = import("./api").ApiResponse<
-  import("./analytics").AnalyticsData
->;
-
-/**
- * Response structure for platform-specific analytics endpoint.
- */
-export interface PlatformAnalyticsData {
-  platform: import("./analytics").Platform;
-  metrics: import("./analytics").OverviewStats;
-  trend: import("./analytics").TrendDataPoint[];
-  content: import("./analytics").ContentItem[];
-  profile: import("./analytics").ProfileStats | null;
-}
-
-export type PlatformAnalyticsResponse = import("./api").ApiResponse<PlatformAnalyticsData>;
-
-/**
- * Health check endpoint response.
- */
-export interface HealthResponse {
-  status: "ok" | "error";
-  timestamp: string;
-  mockMode: boolean;
-  version?: string;
-}
+export type {
+  AnalyticsResponse,
+  UnifiedAnalyticsResponse,
+  PlatformAnalyticsResponse,
+  TrafficResponse,
+  SEOResponse,
+  ConversionResponse,
+  RevenueResponse,
+  SubscriptionResponse,
+  PaymentResponse,
+  UnitEconomicsResponse,
+  DemographicsResponse,
+  SegmentationResponse,
+  CampaignResponse,
+} from "./api";

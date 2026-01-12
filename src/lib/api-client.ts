@@ -1,11 +1,11 @@
 import type {
   ApiResponse,
-  AnalyticsData,
   AnalyticsQueryParams,
   Platform,
   HealthResponse,
   PlatformAnalyticsData,
 } from '@/types';
+import type { UnifiedAnalyticsData } from '@/types/analytics';
 
 /**
  * Custom error class for API errors with status code and error code support
@@ -186,14 +186,14 @@ export const analyticsClient = {
   /**
    * Fetch all analytics data with optional filtering
    */
-  async getAnalytics(params?: AnalyticsQueryParams): Promise<ApiResponse<AnalyticsData>> {
+  async getAnalytics(params?: AnalyticsQueryParams): Promise<ApiResponse<UnifiedAnalyticsData>> {
     const query = buildQueryString({
       platform: params?.platform,
       timeRange: params?.timeRange,
       startDate: params?.startDate,
       endDate: params?.endDate,
     });
-    return apiFetch<ApiResponse<AnalyticsData>>(`/analytics${query}`);
+    return apiFetch<ApiResponse<UnifiedAnalyticsData>>(`/analytics${query}`);
   },
 
   /**

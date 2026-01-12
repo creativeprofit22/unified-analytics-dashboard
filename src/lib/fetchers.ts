@@ -1,13 +1,14 @@
 import { analyticsClient, ApiError } from './api-client';
-import type { AnalyticsQueryParams, Platform, PlatformAnalyticsData, AnalyticsData, HealthResponse } from '@/types';
+import type { AnalyticsQueryParams, Platform, PlatformAnalyticsData, HealthResponse } from '@/types';
+import type { UnifiedAnalyticsData } from '@/types/analytics';
 
 /**
- * SWR-compatible fetcher for analytics
+ * SWR-compatible fetcher for unified analytics
  * Usage: useSWR(['analytics', params], analyticsFetcher)
  */
 export async function analyticsFetcher(
   [_, params]: ['analytics', AnalyticsQueryParams?]
-): Promise<AnalyticsData | undefined> {
+): Promise<UnifiedAnalyticsData | undefined> {
   const response = await analyticsClient.getAnalytics(params);
   if (!response.success) {
     throw new ApiError(response.error || 'Failed to fetch', 500);

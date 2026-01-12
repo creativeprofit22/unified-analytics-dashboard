@@ -1,7 +1,8 @@
 import { useMemo } from 'react';
 import useSWR from 'swr';
 import { analyticsFetcher } from '@/lib/fetchers';
-import type { Platform, TimeRange, AnalyticsData, AnalyticsQueryParams } from '@/types';
+import type { Platform, TimeRange, AnalyticsQueryParams } from '@/types';
+import type { UnifiedAnalyticsData } from '@/types/analytics';
 
 /**
  * Parameters for the useAnalytics hook.
@@ -20,7 +21,7 @@ export interface UseAnalyticsParams {
  */
 export interface UseAnalyticsReturn {
   /** The fetched analytics data, undefined while loading or on error */
-  data: AnalyticsData | undefined;
+  data: UnifiedAnalyticsData | undefined;
   /** Error object if the request failed */
   error: Error | undefined;
   /** True during initial load when there is no data yet */
@@ -30,7 +31,7 @@ export interface UseAnalyticsReturn {
   /** True if an error occurred */
   isError: boolean;
   /** Manually trigger a revalidation/refresh of the data */
-  refresh: () => Promise<AnalyticsData | undefined>;
+  refresh: () => Promise<UnifiedAnalyticsData | undefined>;
 }
 
 /**
@@ -71,7 +72,7 @@ export function useAnalytics(params: UseAnalyticsParams = {}): UseAnalyticsRetur
   const swrKey = enabled ? (['analytics', queryParams] as const) : null;
 
   const { data, error, isLoading, isValidating, mutate } = useSWR<
-    AnalyticsData | undefined,
+    UnifiedAnalyticsData | undefined,
     Error
   >(swrKey, analyticsFetcher);
 

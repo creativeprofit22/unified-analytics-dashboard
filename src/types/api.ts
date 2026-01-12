@@ -3,7 +3,29 @@
  * Provides type-safe wrappers for all API interactions.
  */
 
-import type { Platform, TimeRange } from './analytics';
+import type {
+  TimeRange,
+  UnifiedAnalyticsData,
+  TrafficMetrics,
+  SEOMetrics,
+  ConversionMetrics,
+  RevenueMetrics,
+  SubscriptionMetrics,
+  PaymentMetrics,
+  UnitEconomicsMetrics,
+  DemographicsMetrics,
+  SegmentationMetrics,
+  CampaignMetrics,
+  TrendDataPoint,
+} from './analytics';
+
+import type {
+  Platform,
+  AnalyticsData,
+  OverviewStats,
+  ContentItem,
+  ProfileStats,
+} from './analytics-legacy';
 
 /**
  * Standard API response wrapper.
@@ -105,3 +127,80 @@ export interface PaginationParams {
   /** Sort direction */
   sortOrder?: 'asc' | 'desc';
 }
+
+/**
+ * Response structure for platform-specific analytics endpoint.
+ * @deprecated Use category-specific responses for new features
+ */
+export interface PlatformAnalyticsData {
+  platform: Platform;
+  metrics: OverviewStats;
+  trend: TrendDataPoint[];
+  content: ContentItem[];
+  profile: ProfileStats | null;
+}
+
+/**
+ * Health check endpoint response.
+ */
+export interface HealthResponse {
+  status: 'ok' | 'error';
+  timestamp: string;
+  mockMode: boolean;
+  version?: string;
+}
+
+// =============================================================================
+// COMPOSED RESPONSE TYPES
+// =============================================================================
+
+/**
+ * Response structure for legacy aggregated analytics endpoint.
+ * @deprecated Use UnifiedAnalyticsResponse for new features
+ */
+export type AnalyticsResponse = ApiResponse<AnalyticsData>;
+
+/**
+ * Response structure for unified analytics endpoint.
+ */
+export type UnifiedAnalyticsResponse = ApiResponse<UnifiedAnalyticsData>;
+
+/**
+ * Response structure for platform-specific analytics endpoint.
+ * @deprecated Use category-specific responses for new features
+ */
+export type PlatformAnalyticsResponse = ApiResponse<PlatformAnalyticsData>;
+
+// =============================================================================
+// CATEGORY-SPECIFIC RESPONSE TYPES
+// =============================================================================
+
+/** Traffic metrics response */
+export type TrafficResponse = ApiResponse<TrafficMetrics>;
+
+/** SEO metrics response */
+export type SEOResponse = ApiResponse<SEOMetrics>;
+
+/** Conversion metrics response */
+export type ConversionResponse = ApiResponse<ConversionMetrics>;
+
+/** Revenue metrics response */
+export type RevenueResponse = ApiResponse<RevenueMetrics>;
+
+/** Subscription metrics response */
+export type SubscriptionResponse = ApiResponse<SubscriptionMetrics>;
+
+/** Payment metrics response */
+export type PaymentResponse = ApiResponse<PaymentMetrics>;
+
+/** Unit economics metrics response */
+export type UnitEconomicsResponse = ApiResponse<UnitEconomicsMetrics>;
+
+/** Demographics metrics response */
+export type DemographicsResponse = ApiResponse<DemographicsMetrics>;
+
+/** Segmentation metrics response */
+export type SegmentationResponse = ApiResponse<SegmentationMetrics>;
+
+/** Campaign metrics response */
+export type CampaignResponse = ApiResponse<CampaignMetrics>;
