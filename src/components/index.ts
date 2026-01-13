@@ -11,6 +11,8 @@ export { FilterPanel } from "./FilterPanel";
 export { FilterChip } from "./FilterChip";
 export { ExportButton } from "./ExportButton";
 export { ExportModal } from "./ExportModal";
+export { TabNavigation, DASHBOARD_TABS, type TabId, type Tab, type TabNavigationProps } from "./TabNavigation";
+export { TabPanel, type TabPanelProps } from "./TabPanel";
 
 // Recharts-based chart components
 export * from "./charts";

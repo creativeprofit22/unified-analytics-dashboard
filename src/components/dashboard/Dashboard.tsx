@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAnalytics } from "@/hooks";
 import { useFilters } from "@/contexts/FilterContext";
-import type { TimeRange, FilterState, TrafficSource, CampaignChannel } from "@/types/analytics";
+import type { TimeRange, TrafficSource, CampaignChannel } from "@/types/analytics";
 import { cn } from "@/utils/cn";
+import { TabNavigation, TabPanel, type TabId } from "@/components";
 import {
   TrafficSection,
   SEOSection,
@@ -21,6 +22,7 @@ import {
 interface DashboardProps {
   timeRange?: TimeRange;
   className?: string;
+  syncHash?: boolean;
 }
 
 function LoadingSkeleton() {
@@ -45,9 +47,14 @@ function ErrorDisplay({ message }: { message: string }) {
   );
 }
 
-export function Dashboard({ timeRange = "30d", className }: DashboardProps) {
+export function Dashboard({ timeRange = "30d", className, syncHash = false }: DashboardProps) {
+  const [activeTab, setActiveTab] = useState<TabId>("acquisition");
   const { filters, setOptions } = useFilters();
   const { data, isLoading, error } = useAnalytics({ timeRange, filters });
+
+  const handleTabChange = useCallback((tabId: TabId) => {
+    setActiveTab(tabId);
+  }, []);
 
   // Update filter options when data loads
   useEffect(() => {
@@ -94,16 +101,39 @@ export function Dashboard({ timeRange = "30d", className }: DashboardProps) {
 
   return (
     <div className={cn("space-y-6", className)}>
-      <TrafficSection data={data.traffic} />
-      <SEOSection data={data.seo} />
-      <ConversionsSection data={data.conversions} />
-      <RevenueSection data={data.revenue} />
-      <SubscriptionsSection data={data.subscriptions} />
-      <PaymentsSection data={data.payments} />
-      <UnitEconomicsSection data={data.unitEconomics} />
-      <DemographicsSection data={data.demographics} />
-      <SegmentationSection data={data.segmentation} />
-      <CampaignsSection data={data.campaigns} />
+      <TabNavigation
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        syncHash={syncHash}
+      />
+
+      <TabPanel tabId="acquisition" activeTab={activeTab} className="space-y-6">
+        <TrafficSection data={data.traffic} />
+        <SEOSection data={data.seo} />
+      </TabPanel>
+
+      <TabPanel tabId="conversions" activeTab={activeTab} className="space-y-6">
+        <ConversionsSection data={data.conversions} />
+      </TabPanel>
+
+      <TabPanel tabId="revenue" activeTab={activeTab} className="space-y-6">
+        <RevenueSection data={data.revenue} />
+        <SubscriptionsSection data={data.subscriptions} />
+        <PaymentsSection data={data.payments} />
+      </TabPanel>
+
+      <TabPanel tabId="economics" activeTab={activeTab} className="space-y-6">
+        <UnitEconomicsSection data={data.unitEconomics} />
+      </TabPanel>
+
+      <TabPanel tabId="audience" activeTab={activeTab} className="space-y-6">
+        <DemographicsSection data={data.demographics} />
+        <SegmentationSection data={data.segmentation} />
+      </TabPanel>
+
+      <TabPanel tabId="marketing" activeTab={activeTab} className="space-y-6">
+        <CampaignsSection data={data.campaigns} />
+      </TabPanel>
     </div>
   );
 }
