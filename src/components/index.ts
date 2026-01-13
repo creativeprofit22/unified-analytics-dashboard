@@ -6,6 +6,7 @@ export { MetricCard, type MetricCardProps } from "./MetricCard";
 export { TrendChart, type TrendDataPoint } from "./TrendChart";
 export { CategorySection } from "./CategorySection";
 export { TimeRangePicker, type TimeRangePickerProps } from "./TimeRangePicker";
+export { ThemeToggle } from "./ThemeToggle";
 
 // Recharts-based chart components
 export * from "./charts";

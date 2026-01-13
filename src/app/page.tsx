@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Dashboard, TimeRangePicker } from "@/components";
+import { Dashboard, TimeRangePicker, ThemeToggle } from "@/components";
 import type { TimeRange, CustomDateRange } from "@/types/analytics";
 
 export default function HomePage() {
@@ -16,19 +16,22 @@ export default function HomePage() {
   };
 
   return (
-    <main className="min-h-screen bg-[var(--bg-primary,#0f172a)] text-[var(--text-primary,rgba(255,255,255,0.95))] p-4 sm:p-6 lg:p-8">
+    <main className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] p-4 sm:p-6 lg:p-8">
       <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">Unified Analytics Dashboard</h1>
-          <p className="text-[var(--text-secondary,rgba(255,255,255,0.6))] mt-1 text-sm sm:text-base">
+          <p className="text-[var(--text-secondary)] mt-1 text-sm sm:text-base">
             Multi-platform analytics for GoHighLevel
           </p>
         </div>
-        <TimeRangePicker
-          value={timeRange}
-          onChange={handleTimeRangeChange}
-          customRange={customRange}
-        />
+        <div className="flex items-center gap-3">
+          <ThemeToggle />
+          <TimeRangePicker
+            value={timeRange}
+            onChange={handleTimeRangeChange}
+            customRange={customRange}
+          />
+        </div>
       </header>
 
       <Dashboard timeRange={timeRange} />
