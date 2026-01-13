@@ -791,6 +791,43 @@ export interface CampaignMetrics {
 }
 
 // =============================================================================
+// FILTER TYPES
+// =============================================================================
+
+/**
+ * Active filter selections for analytics data.
+ */
+export interface FilterState {
+  /** Selected traffic sources (empty = all) */
+  sources: TrafficSource[];
+  /** Selected campaign channels (empty = all) */
+  channels: CampaignChannel[];
+  /** Selected campaign names (empty = all) */
+  campaigns: string[];
+}
+
+/**
+ * Available filter options derived from analytics data.
+ */
+export interface FilterOptions {
+  /** Available traffic sources in current data */
+  sources: TrafficSource[];
+  /** Available campaign channels in current data */
+  channels: CampaignChannel[];
+  /** Available campaign names in current data */
+  campaigns: string[];
+}
+
+/**
+ * Default empty filter state (shows all data).
+ */
+export const DEFAULT_FILTER_STATE: FilterState = {
+  sources: [],
+  channels: [],
+  campaigns: [],
+};
+
+// =============================================================================
 // UNIFIED ANALYTICS DATA
 // =============================================================================
 

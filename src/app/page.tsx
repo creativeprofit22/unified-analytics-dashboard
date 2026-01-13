@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Dashboard, TimeRangePicker, ThemeToggle } from "@/components";
+import { Dashboard, TimeRangePicker, ThemeToggle, FilterPanel } from "@/components";
 import type { TimeRange, CustomDateRange } from "@/types/analytics";
 
 export default function HomePage() {
@@ -25,6 +25,7 @@ export default function HomePage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <FilterPanel />
           <ThemeToggle />
           <TimeRangePicker
             value={timeRange}

@@ -96,7 +96,13 @@ export type {
 
   // Unified Analytics Data
   UnifiedAnalyticsData,
+
+  // Filter Types
+  FilterState,
+  FilterOptions,
 } from "./analytics";
+
+export { DEFAULT_FILTER_STATE } from "./analytics";
 
 // =============================================================================
 // LEGACY SOCIAL MEDIA TYPES (Backward Compatibility)

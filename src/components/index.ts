@@ -7,6 +7,8 @@ export { TrendChart, type TrendDataPoint } from "./TrendChart";
 export { CategorySection } from "./CategorySection";
 export { TimeRangePicker, type TimeRangePickerProps } from "./TimeRangePicker";
 export { ThemeToggle } from "./ThemeToggle";
+export { FilterPanel } from "./FilterPanel";
+export { FilterChip } from "./FilterChip";
 
 // Recharts-based chart components
 export * from "./charts";

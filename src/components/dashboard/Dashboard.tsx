@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import { useAnalytics } from "@/hooks";
-import type { TimeRange } from "@/types/analytics";
+import { useFilters } from "@/contexts/FilterContext";
+import type { TimeRange, FilterState, TrafficSource, CampaignChannel } from "@/types/analytics";
 import { cn } from "@/utils/cn";
 import {
   TrafficSection,
@@ -44,7 +46,27 @@ function ErrorDisplay({ message }: { message: string }) {
 }
 
 export function Dashboard({ timeRange = "30d", className }: DashboardProps) {
-  const { data, isLoading, error } = useAnalytics({ timeRange });
+  const { filters, setOptions } = useFilters();
+  const { data, isLoading, error } = useAnalytics({ timeRange, filters });
+
+  // Update filter options when data loads
+  useEffect(() => {
+    if (!data) return;
+
+    const sources: TrafficSource[] = data.traffic?.trafficBySource
+      ? (Object.keys(data.traffic.trafficBySource) as TrafficSource[])
+      : [];
+
+    const channels: CampaignChannel[] = data.campaigns?.byChannel
+      ? (Object.keys(data.campaigns.byChannel) as CampaignChannel[])
+      : [];
+
+    const campaigns: string[] = data.campaigns?.byCampaign
+      ? data.campaigns.byCampaign.map((c) => c.name)
+      : [];
+
+    setOptions({ sources, channels, campaigns });
+  }, [data, setOptions]);
 
   if (isLoading) {
     return (
