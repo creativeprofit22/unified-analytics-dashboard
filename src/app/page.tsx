@@ -1,12 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { Dashboard, TimeRangePicker, ThemeToggle, FilterPanel } from "@/components";
+import { Dashboard, TimeRangePicker, ThemeToggle, FilterPanel, ExportButton } from "@/components";
+import { useAnalytics } from "@/hooks";
+import { useFilters } from "@/contexts/FilterContext";
 import type { TimeRange, CustomDateRange } from "@/types/analytics";
 
 export default function HomePage() {
   const [timeRange, setTimeRange] = useState<TimeRange>("30d");
   const [customRange, setCustomRange] = useState<CustomDateRange | undefined>();
+  const { filters } = useFilters();
+
+  // SWR deduplicates this request with Dashboard's identical call
+  const { data } = useAnalytics({ timeRange, filters });
 
   const handleTimeRangeChange = (range: TimeRange, custom?: CustomDateRange) => {
     setTimeRange(range);
@@ -25,6 +31,7 @@ export default function HomePage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <ExportButton data={data ?? null} />
           <FilterPanel />
           <ThemeToggle />
           <TimeRangePicker

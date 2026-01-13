@@ -9,6 +9,8 @@ export { TimeRangePicker, type TimeRangePickerProps } from "./TimeRangePicker";
 export { ThemeToggle } from "./ThemeToggle";
 export { FilterPanel } from "./FilterPanel";
 export { FilterChip } from "./FilterChip";
+export { ExportButton } from "./ExportButton";
+export { ExportModal } from "./ExportModal";
 
 // Recharts-based chart components
 export * from "./charts";
