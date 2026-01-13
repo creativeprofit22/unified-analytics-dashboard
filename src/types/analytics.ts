@@ -448,6 +448,31 @@ export interface SubscriptionMetrics {
 // =============================================================================
 
 /**
+ * Recovery status for a payment record.
+ */
+export type RecoveryStatus = 'recovered' | 'pending' | 'failed';
+
+/**
+ * Individual payment record for filtering support.
+ */
+export interface PaymentRecord {
+  /** Unique payment ID */
+  id: string;
+  /** Payment method (e.g., "Visa", "PayPal") */
+  method: string;
+  /** Amount in dollars */
+  amount: number;
+  /** Whether the payment was successful */
+  successful: boolean;
+  /** Failure reason (only if failed) */
+  failureReason?: string;
+  /** Recovery status (only if failed) */
+  recoveryStatus?: RecoveryStatus;
+  /** ISO timestamp */
+  timestamp: string;
+}
+
+/**
  * Recovery rates by dunning attempt (attempt1 through attempt4).
  *
  * Each property represents the percentage of failed payments recovered
@@ -497,6 +522,8 @@ export interface PaymentMetrics {
   atRiskRevenue: number;
   recoveredRevenue: number;
   cardsExpiringSoon: CardsExpiring;
+  /** Individual payment records for filtering */
+  paymentRecords?: PaymentRecord[];
 }
 
 // =============================================================================

@@ -361,11 +361,16 @@ export function SectionFilterBar({
     } else if (typeof val === "string" && val) {
       activeChips.push({ key: field.key, label: field.label, value: val });
     } else if (typeof val === "object" && "min" in val) {
-      activeChips.push({
-        key: field.key,
-        label: field.label,
-        value: `${val.min}-${val.max}`,
-      });
+      // Only show chip if range differs from default (actual filtering happening)
+      const defaultRange = field.range || { min: 0, max: 100 };
+      const isAtDefault = val.min === defaultRange.min && val.max === defaultRange.max;
+      if (!isAtDefault) {
+        activeChips.push({
+          key: field.key,
+          label: field.label,
+          value: `${val.min}-${val.max}`,
+        });
+      }
     }
   }
 

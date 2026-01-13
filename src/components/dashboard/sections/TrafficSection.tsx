@@ -73,6 +73,14 @@ export function TrafficSection({ data, comparisonData }: TrafficSectionProps) {
     );
   }, [data?.trafficByMedium, filters.medium]);
 
+  // Filter traffic by campaign
+  const filteredTrafficByCampaign = useMemo(() => {
+    if (!data?.trafficByCampaign) return [];
+    const campaignFilter = typeof filters.campaign === 'string' ? filters.campaign : '';
+    if (!campaignFilter) return data.trafficByCampaign;
+    return data.trafficByCampaign.filter((item) => item.campaign === campaignFilter);
+  }, [data?.trafficByCampaign, filters.campaign]);
+
   return (
     <CategorySection
       title="Traffic & Acquisition"
@@ -168,6 +176,27 @@ export function TrafficSection({ data, comparisonData }: TrafficSectionProps) {
             height={250}
             layout="vertical"
           />
+        </div>
+      )}
+
+      {data.trafficByCampaign && data.trafficByCampaign.length > 0 && (
+        <div className="mt-4">
+          <SectionHeader>Traffic by Campaign</SectionHeader>
+          <BarComparisonChart
+            data={filteredTrafficByCampaign
+              .sort((a, b) => b.sessions - a.sessions)
+              .map((item): BarComparisonDataItem => ({
+                label: item.campaign.replace(/_/g, ' '),
+                value: item.sessions,
+              }))}
+            height={250}
+            layout="vertical"
+          />
+          {filteredTrafficByCampaign.length > 0 && (
+            <div className="mt-2 text-xs text-muted-foreground">
+              Total conversions: {filteredTrafficByCampaign.reduce((sum, c) => sum + c.conversions, 0).toLocaleString()}
+            </div>
+          )}
         </div>
       )}
     </CategorySection>

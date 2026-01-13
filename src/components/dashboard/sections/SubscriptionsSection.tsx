@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import type { UnifiedAnalyticsData, SubscriptionMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
-import { BarComparisonChart, HeatmapChart, type BarComparisonDataItem, type HeatmapDataItem } from "@/components/charts";
+import { BarComparisonChart, HeatmapChart, PieDistributionChart, type BarComparisonDataItem, type HeatmapDataItem, type PieDataItem } from "@/components/charts";
 import { SectionHeader, createMetric } from "../shared";
 import { useSectionFilters } from "@/contexts/SectionFilterContext";
 import { SectionFilterBar } from "@/components/SectionFilterBar";
@@ -52,15 +52,76 @@ export function SubscriptionsSection({ data, comparisonData }: SubscriptionsSect
     activeFilterCount,
   } = useSectionFilters(SECTION_IDS.SUBSCRIPTIONS, filterFields);
 
+  // Get active plan filter
+  const planFilter = useMemo(() => {
+    return Array.isArray(filters.plan) ? filters.plan : [];
+  }, [filters.plan]);
+
+  // Get active cancellation reason filter
+  const cancellationReasonFilter = useMemo(() => {
+    return Array.isArray(filters.cancellationReason) ? filters.cancellationReason : [];
+  }, [filters.cancellationReason]);
+
   // Filter subscribers by plan
   const filteredSubscribersByPlan = useMemo(() => {
     if (!data?.subscribersByPlan) return {};
-    const planFilter = Array.isArray(filters.plan) ? filters.plan : [];
     if (planFilter.length === 0) return data.subscribersByPlan;
     return Object.fromEntries(
       Object.entries(data.subscribersByPlan).filter(([plan]) => planFilter.includes(plan))
     );
-  }, [data?.subscribersByPlan, filters.plan]);
+  }, [data?.subscribersByPlan, planFilter]);
+
+  // Convert subscribers by plan to pie chart data
+  const subscribersByPlanChartData: PieDataItem[] = useMemo(() => {
+    const planColors: Record<string, string> = {
+      Basic: "#3b82f6",      // blue
+      Pro: "#8b5cf6",        // purple
+      Enterprise: "#22c55e", // green
+    };
+    return Object.entries(filteredSubscribersByPlan).map(([plan, count]) => ({
+      name: plan,
+      value: count,
+      color: planColors[plan],
+    }));
+  }, [filteredSubscribersByPlan]);
+
+  // Filter and convert cancellation reasons to bar chart data
+  const cancellationReasonsChartData: BarComparisonDataItem[] = useMemo(() => {
+    if (!data?.cancellationReasons) return [];
+    const reasons = cancellationReasonFilter.length > 0
+      ? Object.entries(data.cancellationReasons).filter(([reason]) => cancellationReasonFilter.includes(reason))
+      : Object.entries(data.cancellationReasons);
+
+    const colors = ["#ef4444", "#f59e0b", "#3b82f6", "#8b5cf6", "#6b7280"];
+    return reasons.map(([reason, count], index) => ({
+      label: reason,
+      value: count,
+      color: colors[index % colors.length],
+    }));
+  }, [data?.cancellationReasons, cancellationReasonFilter]);
+
+  // Calculate filtered totals for metrics
+  const filteredMetrics = useMemo(() => {
+    // If no filter, return original data
+    if (planFilter.length === 0) {
+      return {
+        activeSubscribers: data.activeSubscribers,
+        mrr: data.mrr,
+        arr: data.arr,
+      };
+    }
+
+    // Calculate filtered totals based on selected plans
+    const totalFilteredSubscribers = Object.values(filteredSubscribersByPlan).reduce((a, b) => a + b, 0);
+    const totalAllSubscribers = Object.values(data.subscribersByPlan ?? {}).reduce((a, b) => a + b, 0);
+    const ratio = totalAllSubscribers > 0 ? totalFilteredSubscribers / totalAllSubscribers : 0;
+
+    return {
+      activeSubscribers: totalFilteredSubscribers,
+      mrr: Math.round(data.mrr * ratio),
+      arr: Math.round(data.arr * ratio),
+    };
+  }, [data.activeSubscribers, data.mrr, data.arr, data.subscribersByPlan, filteredSubscribersByPlan, planFilter]);
 
   const mrrChartData: BarComparisonDataItem[] = data.mrrMovement
     ? [
@@ -89,8 +150,8 @@ export function SubscriptionsSection({ data, comparisonData }: SubscriptionsSect
       />
       <MetricGrid>
         <MetricCard
-          title="Active Subscribers"
-          metric={createMetric(data.activeSubscribers, getComparisonValue(comparisonData, "activeSubscribers", data.activeSubscribers, 0.95))}
+          title={planFilter.length > 0 ? `Active Subscribers (${planFilter.join(", ")})` : "Active Subscribers"}
+          metric={createMetric(filteredMetrics.activeSubscribers, getComparisonValue(comparisonData, "activeSubscribers", filteredMetrics.activeSubscribers, 0.95))}
           format="number"
         />
         <MetricCard
@@ -99,13 +160,13 @@ export function SubscriptionsSection({ data, comparisonData }: SubscriptionsSect
           format="number"
         />
         <MetricCard
-          title="MRR"
-          metric={createMetric(data.mrr, getComparisonValue(comparisonData, "mrr", data.mrr, 0.9))}
+          title={planFilter.length > 0 ? `MRR (${planFilter.join(", ")})` : "MRR"}
+          metric={createMetric(filteredMetrics.mrr, getComparisonValue(comparisonData, "mrr", filteredMetrics.mrr, 0.9))}
           format="currency"
         />
         <MetricCard
-          title="ARR"
-          metric={createMetric(data.arr, getComparisonValue(comparisonData, "arr", data.arr, 0.9))}
+          title={planFilter.length > 0 ? `ARR (${planFilter.join(", ")})` : "ARR"}
+          metric={createMetric(filteredMetrics.arr, getComparisonValue(comparisonData, "arr", filteredMetrics.arr, 0.9))}
           format="currency"
         />
         <MetricCard
@@ -129,6 +190,24 @@ export function SubscriptionsSection({ data, comparisonData }: SubscriptionsSect
           format="currency"
         />
       </MetricGrid>
+
+      {subscribersByPlanChartData.length > 0 && (
+        <div className="mt-4">
+          <SectionHeader>
+            Subscribers by Plan
+            {planFilter.length > 0 && (
+              <span className="ml-2 text-sm font-normal text-[var(--text-secondary)]">
+                (Filtered: {planFilter.join(", ")})
+              </span>
+            )}
+          </SectionHeader>
+          <PieDistributionChart
+            data={subscribersByPlanChartData}
+            height={250}
+            innerRadius={50}
+          />
+        </div>
+      )}
 
       {data.mrrMovement && (
         <div className="mt-4">
@@ -165,6 +244,23 @@ export function SubscriptionsSection({ data, comparisonData }: SubscriptionsSect
             colorRange={["#ef4444", "#22c55e"]}
             valueFormatter={(v) => `${v.toFixed(0)}%`}
             showValues={data.retentionByCohort.length <= 8}
+          />
+        </div>
+      )}
+
+      {cancellationReasonsChartData.length > 0 && (
+        <div className="mt-4">
+          <SectionHeader>
+            Cancellation Reasons
+            {cancellationReasonFilter.length > 0 && (
+              <span className="ml-2 text-sm font-normal text-[var(--text-secondary)]">
+                (Filtered: {cancellationReasonFilter.join(", ")})
+              </span>
+            )}
+          </SectionHeader>
+          <BarComparisonChart
+            data={cancellationReasonsChartData}
+            height={200}
           />
         </div>
       )}

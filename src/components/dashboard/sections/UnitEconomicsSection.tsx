@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import type { UnifiedAnalyticsData, UnitEconomicsMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
-import { GaugeChart, type GaugeThreshold } from "@/components/charts";
+import { GaugeChart, BarComparisonChart, HeatmapChart, type GaugeThreshold } from "@/components/charts";
 import { SectionHeader, createMetric } from "../shared";
 import { useSectionFilters } from "@/contexts/SectionFilterContext";
 import { SectionFilterBar } from "@/components/SectionFilterBar";
@@ -85,6 +85,41 @@ export function UnitEconomicsSection({ data, comparisonData }: UnitEconomicsSect
     if (cohortFilter.length === 0) return data.ltvByCohort;
     return data.ltvByCohort.filter(c => cohortFilter.includes(c.cohort));
   }, [data?.ltvByCohort, filters.cohort]);
+
+  // Transform CAC by channel for bar chart
+  const cacByChannelChartData = useMemo(() => {
+    return Object.entries(filteredCacByChannel).map(([channel, value]) => ({
+      label: channel,
+      value,
+    }));
+  }, [filteredCacByChannel]);
+
+  // Transform LTV by channel for bar chart
+  const ltvByChannelChartData = useMemo(() => {
+    return Object.entries(filteredLtvByChannel).map(([channel, value]) => ({
+      label: channel,
+      value,
+    }));
+  }, [filteredLtvByChannel]);
+
+  // Transform LTV by cohort for heatmap chart
+  const ltvCohortHeatmapData = useMemo(() => {
+    if (filteredLtvByCohort.length === 0) return { data: [], xLabels: [], yLabels: [] };
+
+    // Find max months across all cohorts
+    const maxMonths = Math.max(...filteredLtvByCohort.map(c => c.months.length));
+    const xLabels = Array.from({ length: maxMonths }, (_, i) => `M${i + 1}`);
+    const yLabels = filteredLtvByCohort.map(c => c.cohort);
+
+    const heatmapData: { x: number; y: number; value: number }[] = [];
+    filteredLtvByCohort.forEach((cohort, yIndex) => {
+      cohort.months.forEach((value, xIndex) => {
+        heatmapData.push({ x: xIndex, y: yIndex, value });
+      });
+    });
+
+    return { data: heatmapData, xLabels, yLabels };
+  }, [filteredLtvByCohort]);
 
   return (
     <CategorySection
@@ -175,6 +210,55 @@ export function UnitEconomicsSection({ data, comparisonData }: UnitEconomicsSect
           />
         </div>
       </div>
+
+      {/* Channel-based breakdowns - filtered by channel selection */}
+      <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div>
+          <SectionHeader>CAC by Channel</SectionHeader>
+          {cacByChannelChartData.length > 0 ? (
+            <BarComparisonChart
+              data={cacByChannelChartData}
+              height={200}
+              color="#ef4444"
+              layout="vertical"
+            />
+          ) : (
+            <div className="h-[200px] flex items-center justify-center text-sm text-muted-foreground">
+              No channels selected
+            </div>
+          )}
+        </div>
+        <div>
+          <SectionHeader>LTV by Channel</SectionHeader>
+          {ltvByChannelChartData.length > 0 ? (
+            <BarComparisonChart
+              data={ltvByChannelChartData}
+              height={200}
+              color="#22c55e"
+              layout="vertical"
+            />
+          ) : (
+            <div className="h-[200px] flex items-center justify-center text-sm text-muted-foreground">
+              No channels selected
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Cohort-based LTV progression - filtered by cohort selection */}
+      {ltvCohortHeatmapData.data.length > 0 && (
+        <div className="mt-4">
+          <SectionHeader>LTV by Cohort (Cumulative)</SectionHeader>
+          <HeatmapChart
+            data={ltvCohortHeatmapData.data}
+            xLabels={ltvCohortHeatmapData.xLabels}
+            yLabels={ltvCohortHeatmapData.yLabels}
+            height={Math.max(200, ltvCohortHeatmapData.yLabels.length * 50 + 100)}
+            colorRange={["#3b82f6", "#22c55e"]}
+            valueFormatter={(value) => `$${value}`}
+          />
+        </div>
+      )}
     </CategorySection>
   );
 }

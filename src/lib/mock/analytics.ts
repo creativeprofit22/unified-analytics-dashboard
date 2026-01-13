@@ -18,6 +18,8 @@ import type {
   RevenueMetrics,
   SubscriptionMetrics,
   PaymentMetrics,
+  PaymentRecord,
+  RecoveryStatus,
   UnitEconomicsMetrics,
   DemographicsMetrics,
   SegmentationMetrics,
@@ -405,6 +407,9 @@ function getMockSubscriptionData(): SubscriptionMetrics {
  * 6. Payments mock data
  */
 function getMockPaymentData(): PaymentMetrics {
+  // Generate individual payment records
+  const paymentRecords = generatePaymentRecords(2990); // ~2847 successful + ~143 failed
+
   return {
     successfulPayments: 2847,
     failedPayments: 143,
@@ -450,7 +455,82 @@ function getMockPaymentData(): PaymentMetrics {
       next60Days: 89,
       next90Days: 156,
     },
+    paymentRecords,
   };
+}
+
+/**
+ * Generate individual payment records for filtering support
+ */
+function generatePaymentRecords(count: number): PaymentRecord[] {
+  const methods = ["Visa", "Mastercard", "American Express", "PayPal", "Apple Pay", "Other"];
+  const methodWeights = [42, 28, 12, 10, 5, 3]; // % distribution
+
+  const failureReasons = [
+    "Card declined",
+    "Insufficient funds",
+    "Expired card",
+    "Invalid card",
+    "Fraud detection",
+    "Processing error",
+  ];
+  const failureReasonWeights = [52, 38, 24, 12, 8, 9]; // counts, will normalize
+
+  // Failure rate by method (for realistic data)
+  const failureRateByMethod: Record<string, number> = {
+    Visa: 3.2,
+    Mastercard: 4.1,
+    "American Express": 2.8,
+    PayPal: 1.2,
+    "Apple Pay": 0.8,
+    Other: 5.0,
+  };
+
+  const recoveryStatuses: RecoveryStatus[] = ["recovered", "pending", "failed"];
+  // ~62% recovered, ~24% pending, ~14% failed (matching aggregate data)
+  const recoveryWeights = [62, 24, 14];
+
+  const now = Date.now();
+  const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+
+  // Weighted random selection helper
+  function weightedRandom<T>(items: T[], weights: number[]): T {
+    const totalWeight = weights.reduce((a, b) => a + b, 0);
+    let random = Math.random() * totalWeight;
+    for (let i = 0; i < items.length; i++) {
+      random -= weights[i]!;
+      if (random <= 0) return items[i]!;
+    }
+    return items[items.length - 1]!;
+  }
+
+  const records: PaymentRecord[] = [];
+
+  for (let i = 0; i < count; i++) {
+    const method = weightedRandom(methods, methodWeights);
+    const failureRate = failureRateByMethod[method] ?? 5;
+    const successful = Math.random() * 100 > failureRate;
+
+    const record: PaymentRecord = {
+      id: `pay_${String(i).padStart(5, "0")}`,
+      method,
+      amount: Math.floor(Math.random() * 200) + 20, // $20-$220
+      successful,
+      timestamp: new Date(now - Math.random() * thirtyDaysMs).toISOString(),
+    };
+
+    if (!successful) {
+      record.failureReason = weightedRandom(failureReasons, failureReasonWeights);
+      record.recoveryStatus = weightedRandom(recoveryStatuses, recoveryWeights);
+    }
+
+    records.push(record);
+  }
+
+  // Sort by timestamp (most recent first)
+  return records.sort((a, b) =>
+    new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  );
 }
 
 /**
@@ -550,12 +630,12 @@ function getMockDemographicsData(): DemographicsMetrics {
     },
     technology: {
       byBrowser: {
-        Chrome: 52,
-        Safari: 28,
-        Firefox: 8,
-        Edge: 7,
-        "Samsung Internet": 3,
-        Other: 2,
+        Chrome: 6682,
+        Safari: 3598,
+        Firefox: 1028,
+        Edge: 900,
+        "Samsung Internet": 385,
+        Other: 257,
       },
       byOS: {
         iOS: 32,

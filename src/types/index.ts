@@ -58,6 +58,8 @@ export type {
   SubscriptionMetrics,
 
   // Payments
+  RecoveryStatus,
+  PaymentRecord,
   RecoveryByAttempt,
   CardsExpiring,
   PaymentMetrics,

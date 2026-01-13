@@ -178,14 +178,14 @@ export function getDemographicsFilters(data?: {
     {
       key: "deviceType",
       label: "Device",
-      type: "multiselect",
+      type: "multiselect" as const,
       options: deviceTypes,
       placeholder: "Device type",
     },
     {
       key: "browser",
       label: "Browser",
-      type: "multiselect",
+      type: "multiselect" as const,
       options: browsers,
       placeholder: "Browser",
     },
@@ -294,7 +294,9 @@ export function getSubscriptionsFilters(data?: {
     ? Object.keys(data.subscribersByPlan)
     : ["Basic", "Pro", "Enterprise"];
 
-  const churnStatuses = ["All", "Active", "Churned", "At Risk"];
+  const cancellationReasons = data?.cancellationReasons
+    ? Object.keys(data.cancellationReasons)
+    : [];
 
   return [
     {
@@ -304,13 +306,18 @@ export function getSubscriptionsFilters(data?: {
       options: plans,
       placeholder: "Select plans",
     },
-    {
-      key: "churnStatus",
-      label: "Status",
-      type: "select",
-      options: churnStatuses,
-      placeholder: "Churn status",
-    },
+    // Only show cancellation reasons filter if data exists
+    ...(cancellationReasons.length > 0
+      ? [
+          {
+            key: "cancellationReason",
+            label: "Cancellation Reason",
+            type: "multiselect" as const,
+            options: cancellationReasons,
+            placeholder: "Filter by reason",
+          },
+        ]
+      : []),
   ];
 }
 

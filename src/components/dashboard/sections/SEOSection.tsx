@@ -99,16 +99,22 @@ export function SEOSection({ data, comparisonData }: SEOSectionProps) {
       result = result.filter(q => q.query.toLowerCase().includes(querySearch));
     }
 
-    // Position range filter
+    // Position range filter (skip if at default: 1-100)
     const posRange = filters.positionRange;
     if (posRange && typeof posRange === "object" && "min" in posRange) {
-      result = result.filter(q => q.position >= posRange.min && q.position <= posRange.max);
+      const isAtDefault = posRange.min === 1 && posRange.max === 100;
+      if (!isAtDefault) {
+        result = result.filter(q => q.position >= posRange.min && q.position <= posRange.max);
+      }
     }
 
-    // CTR threshold filter
+    // CTR threshold filter (skip if at default: 0-100)
     const ctrRange = filters.ctrThreshold;
     if (ctrRange && typeof ctrRange === "object" && "min" in ctrRange) {
-      result = result.filter(q => q.ctr >= ctrRange.min);
+      const isAtDefault = ctrRange.min === 0 && ctrRange.max === 100;
+      if (!isAtDefault) {
+        result = result.filter(q => q.ctr >= ctrRange.min && q.ctr <= ctrRange.max);
+      }
     }
 
     return result;

@@ -22,6 +22,24 @@ interface PlanRow {
   upgradeRate: number;
 }
 
+interface CampaignRow {
+  campaign: string;
+  source: string;
+  medium: string;
+  users: number;
+  conversions: number;
+  revenue: number;
+  roi: number;
+}
+
+interface NicheRow {
+  niche: string;
+  users: number;
+  conversionRate: number;
+  avgLtv: number;
+  churnRate: number;
+}
+
 const planColumns: Column<PlanRow>[] = [
   { key: "plan", header: "Plan" },
   {
@@ -47,6 +65,64 @@ const planColumns: Column<PlanRow>[] = [
     header: "Upgrade Rate",
     align: "right",
     render: (item) => `${item.upgradeRate.toFixed(1)}%`,
+  },
+];
+
+const campaignColumns: Column<CampaignRow>[] = [
+  { key: "campaign", header: "Campaign" },
+  { key: "source", header: "Source" },
+  { key: "medium", header: "Medium" },
+  {
+    key: "users",
+    header: "Users",
+    align: "right",
+    render: (item) => item.users.toLocaleString(),
+  },
+  {
+    key: "conversions",
+    header: "Conversions",
+    align: "right",
+    render: (item) => item.conversions.toLocaleString(),
+  },
+  {
+    key: "revenue",
+    header: "Revenue",
+    align: "right",
+    render: (item) => `$${item.revenue.toLocaleString()}`,
+  },
+  {
+    key: "roi",
+    header: "ROI",
+    align: "right",
+    render: (item) => `${item.roi.toFixed(1)}x`,
+  },
+];
+
+const nicheColumns: Column<NicheRow>[] = [
+  { key: "niche", header: "Niche" },
+  {
+    key: "users",
+    header: "Users",
+    align: "right",
+    render: (item) => item.users.toLocaleString(),
+  },
+  {
+    key: "conversionRate",
+    header: "Conv. Rate",
+    align: "right",
+    render: (item) => `${item.conversionRate.toFixed(1)}%`,
+  },
+  {
+    key: "avgLtv",
+    header: "Avg LTV",
+    align: "right",
+    render: (item) => `$${item.avgLtv.toLocaleString()}`,
+  },
+  {
+    key: "churnRate",
+    header: "Churn",
+    align: "right",
+    render: (item) => `${item.churnRate.toFixed(1)}%`,
   },
 ];
 
@@ -85,13 +161,49 @@ export function SegmentationSection({ data, comparisonData }: SegmentationSectio
     activeFilterCount,
   } = useSectionFilters(SECTION_IDS.SEGMENTATION, filterFields);
 
+  // Parse segment type filter
+  const segmentTypeFilter = useMemo(() => {
+    return Array.isArray(filters.segmentType) ? filters.segmentType : [];
+  }, [filters.segmentType]);
+
+  // Helper to check if a segment type should be shown (no filter = show all)
+  const shouldShowSection = useMemo(() => {
+    return (sectionType: string) => {
+      if (segmentTypeFilter.length === 0) return true;
+      return segmentTypeFilter.includes(sectionType);
+    };
+  }, [segmentTypeFilter]);
+
   // Filter by behavior segment
   const filteredByBehavior = useMemo(() => {
     if (!data?.byBehavior) return [];
+    if (!shouldShowSection("Behavior")) return [];
     const behaviorFilter = Array.isArray(filters.behavior) ? filters.behavior : [];
     if (behaviorFilter.length === 0) return data.byBehavior;
     return data.byBehavior.filter(b => behaviorFilter.includes(b.segment));
-  }, [data?.byBehavior, filters.behavior]);
+  }, [data?.byBehavior, filters.behavior, shouldShowSection]);
+
+  // Filter by plan
+  const filteredByPlan = useMemo(() => {
+    if (!data?.byPlan) return [];
+    if (!shouldShowSection("Plan")) return [];
+    return data.byPlan;
+  }, [data?.byPlan, shouldShowSection]);
+
+  // Show lifecycle section based on segment type filter
+  const showLifecycle = useMemo(() => {
+    return shouldShowSection("Cohort") && !!data?.byLifecycle;
+  }, [shouldShowSection, data?.byLifecycle]);
+
+  // Show campaign section based on segment type filter
+  const showCampaigns = useMemo(() => {
+    return shouldShowSection("Campaign") && !!data?.byCampaign && data.byCampaign.length > 0;
+  }, [shouldShowSection, data?.byCampaign]);
+
+  // Show niche section based on segment type filter
+  const showNiches = useMemo(() => {
+    return shouldShowSection("Niche") && !!data?.byNiche && data.byNiche.length > 0;
+  }, [shouldShowSection, data?.byNiche]);
 
   return (
     <CategorySection
@@ -125,37 +237,37 @@ export function SegmentationSection({ data, comparisonData }: SegmentationSectio
         </div>
       )}
 
-      {data.byPlan && data.byPlan.length > 0 && (
+      {filteredByPlan && filteredByPlan.length > 0 && (
         <div className="mt-4">
           <SectionHeader>By Plan</SectionHeader>
-          <DataTable data={data.byPlan} columns={planColumns} keyField="plan" />
+          <DataTable data={filteredByPlan} columns={planColumns} keyField="plan" />
         </div>
       )}
 
-      {data.byLifecycle && (
+      {showLifecycle && (
         <div className="mt-4">
           <SectionHeader>Lifecycle Stages</SectionHeader>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-            {Object.entries(data.byLifecycle).map(([stage, count]) => (
+            {Object.entries(data.byLifecycle!).map(([stage, count]) => (
               <StatCard key={stage} label={stage} value={count} />
             ))}
           </div>
         </div>
       )}
 
-      {data.byLifecycle && (
+      {showLifecycle && (
         <div className="mt-4">
           <SectionHeader>Lifecycle Flow</SectionHeader>
           <SankeyChart
             nodes={(() => {
-              const stages = Object.keys(data.byLifecycle);
+              const stages = Object.keys(data.byLifecycle!);
               return stages.map((stage): SankeyNode => ({
                 name: stage.charAt(0).toUpperCase() + stage.slice(1),
                 color: stage === "churned" ? "#ef4444" : stage === "customer" ? "#22c55e" : undefined,
               }));
             })()}
             links={(() => {
-              const lifecycle = data.byLifecycle;
+              const lifecycle = data.byLifecycle!;
               const links: SankeyLink[] = [];
 
               // Define typical lifecycle flow
@@ -180,6 +292,20 @@ export function SegmentationSection({ data, comparisonData }: SegmentationSectio
             })()}
             height={300}
           />
+        </div>
+      )}
+
+      {showCampaigns && (
+        <div className="mt-4">
+          <SectionHeader>By Campaign</SectionHeader>
+          <DataTable data={data.byCampaign!} columns={campaignColumns} keyField="campaign" />
+        </div>
+      )}
+
+      {showNiches && (
+        <div className="mt-4">
+          <SectionHeader>By Niche</SectionHeader>
+          <DataTable data={data.byNiche!} columns={nicheColumns} keyField="niche" />
         </div>
       )}
 

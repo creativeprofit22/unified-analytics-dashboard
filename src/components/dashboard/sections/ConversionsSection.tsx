@@ -5,7 +5,7 @@ import type { UnifiedAnalyticsData, ConversionMetrics } from "@/types/analytics"
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
 import { FunnelChart, type FunnelDataItem } from "@/components/charts";
-import { SectionHeader, createMetric } from "../shared";
+import { DataTable, SectionHeader, createMetric, type Column } from "../shared";
 import { useSectionFilters } from "@/contexts/SectionFilterContext";
 import { SectionFilterBar } from "@/components/SectionFilterBar";
 import { getConversionsFilters, SECTION_IDS } from "@/config/sectionFilters";
@@ -36,6 +36,36 @@ function MetricGrid({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Row type for conversions by source table */
+interface SourceConversionRow {
+  source: string;
+  visitors: number;
+  conversions: number;
+  rate: number;
+}
+
+const sourceColumns: Column<SourceConversionRow>[] = [
+  { key: "source", header: "Source" },
+  {
+    key: "visitors",
+    header: "Visitors",
+    align: "right",
+    render: (item) => item.visitors.toLocaleString(),
+  },
+  {
+    key: "conversions",
+    header: "Conversions",
+    align: "right",
+    render: (item) => item.conversions.toLocaleString(),
+  },
+  {
+    key: "rate",
+    header: "Conv. Rate",
+    align: "right",
+    render: (item) => `${item.rate.toFixed(2)}%`,
+  },
+];
+
 export function ConversionsSection({ data, comparisonData }: ConversionsSectionProps) {
   if (!data) return null;
 
@@ -60,14 +90,20 @@ export function ConversionsSection({ data, comparisonData }: ConversionsSectionP
     return data.funnel.filter(f => stepFilter.includes(f.step));
   }, [data?.funnel, filters.funnelStep]);
 
-  // Filter conversions by source
-  const filteredConversionsBySource = useMemo(() => {
-    if (!data?.conversionsBySource) return {};
+  // Filter conversions by source and transform to array for DataTable
+  const filteredSourceData = useMemo((): SourceConversionRow[] => {
+    if (!data?.conversionsBySource) return [];
     const sourceFilter = Array.isArray(filters.conversionSource) ? filters.conversionSource : [];
-    if (sourceFilter.length === 0) return data.conversionsBySource;
-    return Object.fromEntries(
-      Object.entries(data.conversionsBySource).filter(([source]) => sourceFilter.includes(source))
-    );
+
+    return Object.entries(data.conversionsBySource)
+      .filter(([source]) => sourceFilter.length === 0 || sourceFilter.includes(source))
+      .map(([source, conv]): SourceConversionRow => ({
+        source: source.charAt(0).toUpperCase() + source.slice(1), // Capitalize source name
+        visitors: conv.visitors,
+        conversions: conv.conversions,
+        rate: conv.rate,
+      }))
+      .sort((a, b) => b.conversions - a.conversions); // Sort by conversions descending
   }, [data?.conversionsBySource, filters.conversionSource]);
 
   return (
@@ -130,6 +166,17 @@ export function ConversionsSection({ data, comparisonData }: ConversionsSectionP
             }))}
             height={280}
             showLabels={true}
+          />
+        </div>
+      )}
+
+      {filteredSourceData.length > 0 && (
+        <div className="mt-4">
+          <SectionHeader>Conversions by Source</SectionHeader>
+          <DataTable
+            data={filteredSourceData}
+            columns={sourceColumns}
+            keyField="source"
           />
         </div>
       )}

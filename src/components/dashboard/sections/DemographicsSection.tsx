@@ -92,64 +92,74 @@ export function DemographicsSection({ data, comparisonData }: DemographicsSectio
       {data.geographic?.byCountry && data.geographic.byCountry.length > 0 && (
         <div>
           <SectionHeader>Top Countries</SectionHeader>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {filteredCountries.slice(0, 4).map((country) => (
-              <div
-                key={country.countryCode}
-                className="p-3 rounded-lg bg-[var(--bg-secondary,rgba(255,255,255,0.03))] flex items-center gap-3"
-              >
-                <span className="text-2xl">{getCountryFlag(country.countryCode)}</span>
-                <div>
-                  <p className="text-sm font-medium text-[var(--text-primary)]">
-                    {country.country}
-                  </p>
-                  <p className="text-xs text-[var(--text-secondary)]">
-                    {country.users.toLocaleString()} users
-                  </p>
-                </div>
+          {filteredCountries.length > 0 ? (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {filteredCountries.slice(0, 4).map((country) => (
+                  <div
+                    key={country.countryCode}
+                    className="p-3 rounded-lg bg-[var(--bg-secondary,rgba(255,255,255,0.03))] flex items-center gap-3"
+                  >
+                    <span className="text-2xl">{getCountryFlag(country.countryCode)}</span>
+                    <div>
+                      <p className="text-sm font-medium text-[var(--text-primary)]">
+                        {country.country}
+                      </p>
+                      <p className="text-xs text-[var(--text-secondary)]">
+                        {country.users.toLocaleString()} users
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="mt-4">
-            <BarComparisonChart
-              data={filteredCountries
-                .slice(0, 5)
-                .map((country): BarComparisonDataItem => ({
-                  label: country.country,
-                  value: country.users,
-                }))}
-              height={200}
-              layout="vertical"
-            />
-          </div>
+              <div className="mt-4">
+                <BarComparisonChart
+                  data={filteredCountries
+                    .slice(0, 5)
+                    .map((country): BarComparisonDataItem => ({
+                      label: country.country,
+                      value: country.users,
+                    }))}
+                  height={200}
+                  layout="vertical"
+                />
+              </div>
+            </>
+          ) : (
+            <p className="text-sm text-[var(--text-secondary)] py-4">No countries match the selected filters.</p>
+          )}
         </div>
       )}
 
       {data.device?.byType && Object.keys(data.device.byType).length > 0 && (
         <div className="mt-4">
           <SectionHeader>Device Types</SectionHeader>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="grid grid-cols-3 gap-3">
-              {Object.entries(filteredDeviceTypes).map(([type, count]) => (
-                <StatCard
-                  key={type}
-                  label={type}
-                  value={count}
-                  icon={deviceIcons[type] || "\uD83D\uDCDF"}
+          {Object.keys(filteredDeviceTypes).length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="grid grid-cols-3 gap-3">
+                {Object.entries(filteredDeviceTypes).map(([type, count]) => (
+                  <StatCard
+                    key={type}
+                    label={type}
+                    value={count}
+                    icon={deviceIcons[type] || "\uD83D\uDCDF"}
+                  />
+                ))}
+              </div>
+              <div>
+                <PieDistributionChart
+                  data={Object.entries(filteredDeviceTypes).map(([type, count]): PieDataItem => ({
+                    name: type.charAt(0).toUpperCase() + type.slice(1),
+                    value: count,
+                  }))}
+                  height={250}
+                  innerRadius={50}
                 />
-              ))}
+              </div>
             </div>
-            <div>
-              <PieDistributionChart
-                data={Object.entries(filteredDeviceTypes).map(([type, count]): PieDataItem => ({
-                  name: type.charAt(0).toUpperCase() + type.slice(1),
-                  value: count,
-                }))}
-                height={250}
-                innerRadius={50}
-              />
-            </div>
-          </div>
+          ) : (
+            <p className="text-sm text-[var(--text-secondary)] py-4">No devices match the selected filters.</p>
+          )}
         </div>
       )}
 
@@ -157,17 +167,21 @@ export function DemographicsSection({ data, comparisonData }: DemographicsSectio
         Object.keys(data.technology.byBrowser).length > 0 && (
           <div className="mt-4">
             <SectionHeader>Browser Distribution</SectionHeader>
-            <BarComparisonChart
-              data={Object.entries(filteredBrowsers)
-                .sort(([, a], [, b]) => b - a)
-                .slice(0, 5)
-                .map(([browser, count]): BarComparisonDataItem => ({
-                  label: browser,
-                  value: count,
-                }))}
-              height={200}
-              layout="vertical"
-            />
+            {Object.keys(filteredBrowsers).length > 0 ? (
+              <BarComparisonChart
+                data={Object.entries(filteredBrowsers)
+                  .sort(([, a], [, b]) => b - a)
+                  .slice(0, 5)
+                  .map(([browser, count]): BarComparisonDataItem => ({
+                    label: browser,
+                    value: count,
+                  }))}
+                height={200}
+                layout="vertical"
+              />
+            ) : (
+              <p className="text-sm text-[var(--text-secondary)] py-4">No browsers match the selected filters.</p>
+            )}
           </div>
         )}
     </CategorySection>
