@@ -61,7 +61,20 @@ export function FilterPanel() {
     clearFilters,
     hasActiveFilters,
     activeFilterCount,
+    activeTab,
   } = useFilters();
+
+  // Context-aware filter visibility based on active tab
+  const showSources = activeTab === "acquisition";
+  const showChannels = activeTab === "marketing";
+  const showCampaigns = activeTab === "marketing";
+
+  // Context-aware active filter count
+  const contextActiveCount =
+    (showSources ? filters.sources.length : 0) +
+    (showChannels ? filters.channels.length : 0) +
+    (showCampaigns ? filters.campaigns.length : 0);
+  const hasContextFilters = contextActiveCount > 0;
 
   return (
     <div className="relative">
@@ -69,7 +82,7 @@ export function FilterPanel() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border transition-colors ${
-          hasActiveFilters
+          hasContextFilters
             ? "bg-[var(--accent-primary)] text-white border-[var(--accent-primary)]"
             : "bg-[var(--bg-secondary)] text-[var(--text-primary)] border-[var(--border-primary)] hover:bg-[var(--bg-tertiary)]"
         }`}
@@ -78,9 +91,9 @@ export function FilterPanel() {
       >
         <FilterIcon />
         <span>Filters</span>
-        {activeFilterCount > 0 && (
+        {contextActiveCount > 0 && (
           <span className="flex items-center justify-center w-5 h-5 text-xs bg-white/20 rounded-full">
-            {activeFilterCount}
+            {contextActiveCount}
           </span>
         )}
         <ChevronDownIcon
@@ -107,7 +120,7 @@ export function FilterPanel() {
               <h3 className="text-sm font-semibold text-[var(--text-primary)]">
                 Filter Analytics
               </h3>
-              {hasActiveFilters && (
+              {hasContextFilters && (
                 <button
                   onClick={clearFilters}
                   className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
@@ -118,8 +131,8 @@ export function FilterPanel() {
             </div>
 
             <div className="p-3 space-y-4 max-h-96 overflow-y-auto">
-              {/* Traffic Sources */}
-              {options.sources.length > 0 && (
+              {/* Traffic Sources - Acquisition tab only */}
+              {showSources && options.sources.length > 0 && (
                 <FilterSection
                   title="Traffic Source"
                   items={options.sources}
@@ -129,8 +142,8 @@ export function FilterPanel() {
                 />
               )}
 
-              {/* Campaign Channels */}
-              {options.channels.length > 0 && (
+              {/* Campaign Channels - Marketing tab only */}
+              {showChannels && options.channels.length > 0 && (
                 <FilterSection
                   title="Channel"
                   items={options.channels}
@@ -140,8 +153,8 @@ export function FilterPanel() {
                 />
               )}
 
-              {/* Campaigns */}
-              {options.campaigns.length > 0 && (
+              {/* Campaigns - Marketing tab only */}
+              {showCampaigns && options.campaigns.length > 0 && (
                 <div>
                   <h4 className="text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider mb-2">
                     Campaigns
@@ -167,10 +180,18 @@ export function FilterPanel() {
                 </div>
               )}
 
-              {/* No options available */}
-              {options.sources.length === 0 &&
-                options.channels.length === 0 &&
-                options.campaigns.length === 0 && (
+              {/* No options available for current tab */}
+              {!showSources && !showChannels && !showCampaigns && (
+                <p className="text-sm text-[var(--text-secondary)] text-center py-4">
+                  No filters available for this section
+                </p>
+              )}
+
+              {/* Show message when filters exist but none match current tab options */}
+              {(showSources || showChannels || showCampaigns) &&
+                (!showSources || options.sources.length === 0) &&
+                (!showChannels || options.channels.length === 0) &&
+                (!showCampaigns || options.campaigns.length === 0) && (
                   <p className="text-sm text-[var(--text-secondary)] text-center py-4">
                     No filter options available
                   </p>
@@ -180,33 +201,36 @@ export function FilterPanel() {
         </>
       )}
 
-      {/* Active Filter Chips */}
-      {hasActiveFilters && (
+      {/* Active Filter Chips - context-aware */}
+      {hasContextFilters && (
         <div className="absolute left-0 top-full mt-2 flex flex-wrap gap-2">
-          {filters.sources.map((source) => (
-            <FilterChip
-              key={source}
-              label={SOURCE_LABELS[source]}
-              category="source"
-              onRemove={() => toggleSource(source)}
-            />
-          ))}
-          {filters.channels.map((channel) => (
-            <FilterChip
-              key={channel}
-              label={CHANNEL_LABELS[channel]}
-              category="channel"
-              onRemove={() => toggleChannel(channel)}
-            />
-          ))}
-          {filters.campaigns.map((campaign) => (
-            <FilterChip
-              key={campaign}
-              label={campaign}
-              category="campaign"
-              onRemove={() => toggleCampaign(campaign)}
-            />
-          ))}
+          {showSources &&
+            filters.sources.map((source) => (
+              <FilterChip
+                key={source}
+                label={SOURCE_LABELS[source]}
+                category="source"
+                onRemove={() => toggleSource(source)}
+              />
+            ))}
+          {showChannels &&
+            filters.channels.map((channel) => (
+              <FilterChip
+                key={channel}
+                label={CHANNEL_LABELS[channel]}
+                category="channel"
+                onRemove={() => toggleChannel(channel)}
+              />
+            ))}
+          {showCampaigns &&
+            filters.campaigns.map((campaign) => (
+              <FilterChip
+                key={campaign}
+                label={campaign}
+                category="campaign"
+                onRemove={() => toggleCampaign(campaign)}
+              />
+            ))}
         </div>
       )}
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { useAnalytics } from "@/hooks";
 import { useFilters } from "@/contexts/FilterContext";
 import type { TimeRange, TrafficSource, CampaignChannel } from "@/types/analytics";
@@ -48,13 +48,12 @@ function ErrorDisplay({ message }: { message: string }) {
 }
 
 export function Dashboard({ timeRange = "30d", className, syncHash = false }: DashboardProps) {
-  const [activeTab, setActiveTab] = useState<TabId>("acquisition");
-  const { filters, setOptions } = useFilters();
+  const { filters, setOptions, activeTab, setActiveTab } = useFilters();
   const { data, isLoading, error } = useAnalytics({ timeRange, filters });
 
   const handleTabChange = useCallback((tabId: TabId) => {
     setActiveTab(tabId);
-  }, []);
+  }, [setActiveTab]);
 
   // Update filter options when data loads
   useEffect(() => {

@@ -22,8 +22,8 @@ export default function HomePage() {
   };
 
   return (
-    <main className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] p-4 sm:p-6 lg:p-8">
-      <header className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <main className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
+      <header className="sticky top-0 z-30 bg-[var(--bg-primary)] border-b border-[var(--border-primary)] px-4 sm:px-6 lg:px-8 py-4 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">Unified Analytics Dashboard</h1>
           <p className="text-[var(--text-secondary)] mt-1 text-sm sm:text-base">
@@ -42,7 +42,9 @@ export default function HomePage() {
         </div>
       </header>
 
-      <Dashboard timeRange={timeRange} />
+      <div className="px-4 sm:px-6 lg:px-8 pb-8">
+        <Dashboard timeRange={timeRange} />
+      </div>
     </main>
   );
 }

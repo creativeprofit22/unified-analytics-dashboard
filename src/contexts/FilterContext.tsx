@@ -16,6 +16,7 @@ import type {
   CampaignChannel,
 } from "@/types";
 import { DEFAULT_FILTER_STATE } from "@/types";
+import type { TabId } from "@/components/TabNavigation";
 
 interface FilterContextValue {
   /** Current filter state */
@@ -38,6 +39,10 @@ interface FilterContextValue {
   hasActiveFilters: boolean;
   /** Count of active filters */
   activeFilterCount: number;
+  /** Currently active dashboard tab */
+  activeTab: TabId;
+  /** Set active dashboard tab */
+  setActiveTab: (tab: TabId) => void;
 }
 
 const FilterContext = createContext<FilterContextValue | undefined>(undefined);
@@ -69,6 +74,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
     channels: [],
     campaigns: [],
   });
+  const [activeTab, setActiveTab] = useState<TabId>("acquisition");
   const [mounted, setMounted] = useState(false);
 
   // Initialize filters from localStorage
@@ -150,6 +156,8 @@ export function FilterProvider({ children }: { children: ReactNode }) {
       clearCategory,
       hasActiveFilters,
       activeFilterCount,
+      activeTab,
+      setActiveTab,
     }),
     [
       filters,
@@ -161,6 +169,7 @@ export function FilterProvider({ children }: { children: ReactNode }) {
       clearCategory,
       hasActiveFilters,
       activeFilterCount,
+      activeTab,
     ]
   );
 
@@ -179,6 +188,8 @@ export function FilterProvider({ children }: { children: ReactNode }) {
           clearCategory: () => {},
           hasActiveFilters: false,
           activeFilterCount: 0,
+          activeTab: "acquisition",
+          setActiveTab: () => {},
         }}
       >
         {children}
