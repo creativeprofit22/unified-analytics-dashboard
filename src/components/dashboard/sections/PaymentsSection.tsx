@@ -1,12 +1,26 @@
 "use client";
 
-import type { UnifiedAnalyticsData } from "@/types/analytics";
+import type { UnifiedAnalyticsData, PaymentMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
 import { createMetric } from "../shared";
 
 interface PaymentsSectionProps {
   data: UnifiedAnalyticsData["payments"];
+  comparisonData?: UnifiedAnalyticsData["payments"];
+}
+
+/** Get comparison value or calculate a fallback */
+function getComparisonValue(
+  comparisonData: PaymentMetrics | undefined,
+  field: keyof PaymentMetrics,
+  currentValue: number,
+  fallbackRatio = 0.9
+): number {
+  if (comparisonData && typeof comparisonData[field] === 'number') {
+    return comparisonData[field] as number;
+  }
+  return currentValue * fallbackRatio;
 }
 
 function MetricGrid({ children }: { children: React.ReactNode }) {
@@ -17,7 +31,7 @@ function MetricGrid({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function PaymentsSection({ data }: PaymentsSectionProps) {
+export function PaymentsSection({ data, comparisonData }: PaymentsSectionProps) {
   if (!data) return null;
 
   return (
@@ -28,42 +42,42 @@ export function PaymentsSection({ data }: PaymentsSectionProps) {
       <MetricGrid>
         <MetricCard
           title="Successful Payments"
-          metric={createMetric(data.successfulPayments, data.successfulPayments * 0.95)}
+          metric={createMetric(data.successfulPayments, getComparisonValue(comparisonData, "successfulPayments", data.successfulPayments, 0.95))}
           format="number"
         />
         <MetricCard
           title="Failed Payments"
-          metric={createMetric(data.failedPayments, data.failedPayments * 1.1)}
+          metric={createMetric(data.failedPayments, getComparisonValue(comparisonData, "failedPayments", data.failedPayments, 1.1))}
           format="number"
         />
         <MetricCard
           title="Failure Rate"
-          metric={createMetric(data.failureRate, data.failureRate * 1.05)}
+          metric={createMetric(data.failureRate, getComparisonValue(comparisonData, "failureRate", data.failureRate, 1.05))}
           format="percent"
         />
         <MetricCard
           title="Recovery Rate"
-          metric={createMetric(data.recoveryRate, data.recoveryRate * 0.92)}
+          metric={createMetric(data.recoveryRate, getComparisonValue(comparisonData, "recoveryRate", data.recoveryRate, 0.92))}
           format="percent"
         />
         <MetricCard
           title="Dunning Success"
-          metric={createMetric(data.dunningSuccessRate, data.dunningSuccessRate * 0.9)}
+          metric={createMetric(data.dunningSuccessRate, getComparisonValue(comparisonData, "dunningSuccessRate", data.dunningSuccessRate, 0.9))}
           format="percent"
         />
         <MetricCard
           title="At-Risk Revenue"
-          metric={createMetric(data.atRiskRevenue, data.atRiskRevenue * 1.15)}
+          metric={createMetric(data.atRiskRevenue, getComparisonValue(comparisonData, "atRiskRevenue", data.atRiskRevenue, 1.15))}
           format="currency"
         />
         <MetricCard
           title="Recovered Revenue"
-          metric={createMetric(data.recoveredRevenue, data.recoveredRevenue * 0.88)}
+          metric={createMetric(data.recoveredRevenue, getComparisonValue(comparisonData, "recoveredRevenue", data.recoveredRevenue, 0.88))}
           format="currency"
         />
         <MetricCard
           title="Involuntary Churn"
-          metric={createMetric(data.involuntaryChurnRate, data.involuntaryChurnRate * 1.08)}
+          metric={createMetric(data.involuntaryChurnRate, getComparisonValue(comparisonData, "involuntaryChurnRate", data.involuntaryChurnRate, 1.08))}
           format="percent"
         />
       </MetricGrid>

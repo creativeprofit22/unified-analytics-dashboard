@@ -1,6 +1,6 @@
 "use client";
 
-import type { UnifiedAnalyticsData } from "@/types/analytics";
+import type { UnifiedAnalyticsData, RevenueMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
 import { AreaTrendChart } from "@/components/charts";
@@ -8,6 +8,20 @@ import { SectionHeader, createMetric } from "../shared";
 
 interface RevenueSectionProps {
   data: UnifiedAnalyticsData["revenue"];
+  comparisonData?: UnifiedAnalyticsData["revenue"];
+}
+
+/** Get comparison value or calculate a fallback */
+function getComparisonValue(
+  comparisonData: RevenueMetrics | undefined,
+  field: keyof RevenueMetrics,
+  currentValue: number,
+  fallbackRatio = 0.9
+): number {
+  if (comparisonData && typeof comparisonData[field] === "number") {
+    return comparisonData[field] as number;
+  }
+  return currentValue * fallbackRatio;
 }
 
 function MetricGrid({ children }: { children: React.ReactNode }) {
@@ -18,7 +32,7 @@ function MetricGrid({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function RevenueSection({ data }: RevenueSectionProps) {
+export function RevenueSection({ data, comparisonData }: RevenueSectionProps) {
   if (!data) return null;
 
   return (
@@ -29,32 +43,32 @@ export function RevenueSection({ data }: RevenueSectionProps) {
       <MetricGrid>
         <MetricCard
           title="Gross Revenue"
-          metric={createMetric(data.grossRevenue, data.grossRevenue * 0.85)}
+          metric={createMetric(data.grossRevenue, getComparisonValue(comparisonData, "grossRevenue", data.grossRevenue, 0.85))}
           format="currency"
         />
         <MetricCard
           title="Net Revenue"
-          metric={createMetric(data.netRevenue, data.netRevenue * 0.87)}
+          metric={createMetric(data.netRevenue, getComparisonValue(comparisonData, "netRevenue", data.netRevenue, 0.87))}
           format="currency"
         />
         <MetricCard
           title="Transactions"
-          metric={createMetric(data.transactions, data.transactions * 0.9)}
+          metric={createMetric(data.transactions, getComparisonValue(comparisonData, "transactions", data.transactions, 0.9))}
           format="number"
         />
         <MetricCard
           title="AOV"
-          metric={createMetric(data.aov, data.aov * 0.95)}
+          metric={createMetric(data.aov, getComparisonValue(comparisonData, "aov", data.aov, 0.95))}
           format="currency"
         />
         <MetricCard
           title="Revenue/Visitor"
-          metric={createMetric(data.revenuePerVisitor, data.revenuePerVisitor * 0.92)}
+          metric={createMetric(data.revenuePerVisitor, getComparisonValue(comparisonData, "revenuePerVisitor", data.revenuePerVisitor, 0.92))}
           format="currency"
         />
         <MetricCard
           title="Refund Rate"
-          metric={createMetric(data.refundRate, data.refundRate * 1.1)}
+          metric={createMetric(data.refundRate, getComparisonValue(comparisonData, "refundRate", data.refundRate, 1.1))}
           format="percent"
         />
       </MetricGrid>

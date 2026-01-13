@@ -7,6 +7,7 @@ import { StatCard, SectionHeader } from "../shared";
 
 interface DemographicsSectionProps {
   data: UnifiedAnalyticsData["demographics"];
+  comparisonData?: UnifiedAnalyticsData["demographics"];
 }
 
 function getCountryFlag(countryCode: string): string {
@@ -23,7 +24,7 @@ const deviceIcons: Record<string, string> = {
   tablet: "\uD83D\uDCDF",
 };
 
-export function DemographicsSection({ data }: DemographicsSectionProps) {
+export function DemographicsSection({ data, comparisonData }: DemographicsSectionProps) {
   if (!data) return null;
 
   return (

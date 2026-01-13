@@ -1,12 +1,26 @@
 "use client";
 
-import type { UnifiedAnalyticsData } from "@/types/analytics";
+import type { UnifiedAnalyticsData, SEOMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
 import { DataTable, SectionHeader, createMetric, type Column } from "../shared";
 
 interface SEOSectionProps {
   data: UnifiedAnalyticsData["seo"];
+  comparisonData?: UnifiedAnalyticsData["seo"];
+}
+
+/** Get comparison value or calculate a fallback */
+function getComparisonValue(
+  comparisonData: SEOMetrics | undefined,
+  field: keyof SEOMetrics,
+  currentValue: number,
+  fallbackRatio = 0.9
+): number {
+  if (comparisonData && typeof comparisonData[field] === "number") {
+    return comparisonData[field] as number;
+  }
+  return currentValue * fallbackRatio;
 }
 
 function MetricGrid({ children }: { children: React.ReactNode }) {
@@ -53,7 +67,7 @@ const queryColumns: Column<QueryRow>[] = [
   },
 ];
 
-export function SEOSection({ data }: SEOSectionProps) {
+export function SEOSection({ data, comparisonData }: SEOSectionProps) {
   if (!data) return null;
 
   return (
@@ -61,42 +75,42 @@ export function SEOSection({ data }: SEOSectionProps) {
       <MetricGrid>
         <MetricCard
           title="Visibility Score"
-          metric={createMetric(data.visibilityScore, data.visibilityScore * 0.95)}
+          metric={createMetric(data.visibilityScore, getComparisonValue(comparisonData, "visibilityScore", data.visibilityScore, 0.95))}
           format="number"
         />
         <MetricCard
           title="Impressions"
-          metric={createMetric(data.impressions, data.impressions * 0.88)}
+          metric={createMetric(data.impressions, getComparisonValue(comparisonData, "impressions", data.impressions, 0.88))}
           format="number"
         />
         <MetricCard
           title="Clicks"
-          metric={createMetric(data.clicks, data.clicks * 0.85)}
+          metric={createMetric(data.clicks, getComparisonValue(comparisonData, "clicks", data.clicks, 0.85))}
           format="number"
         />
         <MetricCard
           title="CTR"
-          metric={createMetric(data.ctr, data.ctr * 0.92)}
+          metric={createMetric(data.ctr, getComparisonValue(comparisonData, "ctr", data.ctr, 0.92))}
           format="percent"
         />
         <MetricCard
           title="Avg Position"
-          metric={createMetric(data.averagePosition, data.averagePosition * 1.1)}
+          metric={createMetric(data.averagePosition, getComparisonValue(comparisonData, "averagePosition", data.averagePosition, 1.1))}
           format="number"
         />
         <MetricCard
           title="Domain Authority"
-          metric={createMetric(data.domainAuthority, data.domainAuthority * 0.98)}
+          metric={createMetric(data.domainAuthority, getComparisonValue(comparisonData, "domainAuthority", data.domainAuthority, 0.98))}
           format="number"
         />
         <MetricCard
           title="Backlinks"
-          metric={createMetric(data.backlinks, data.backlinks * 0.9)}
+          metric={createMetric(data.backlinks, getComparisonValue(comparisonData, "backlinks", data.backlinks, 0.9))}
           format="number"
         />
         <MetricCard
           title="Indexed Pages"
-          metric={createMetric(data.indexedPages, data.indexedPages * 0.95)}
+          metric={createMetric(data.indexedPages, getComparisonValue(comparisonData, "indexedPages", data.indexedPages, 0.95))}
           format="number"
         />
       </MetricGrid>

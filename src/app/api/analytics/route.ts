@@ -14,7 +14,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isMockMode } from "@/config/mock";
 import { parseTimeRange } from "@/lib/time";
-import { getCachedUnifiedMockData, getCachedLegacyMockData } from "@/lib/mock/analytics";
+import { getCachedUnifiedMockData, getCachedLegacyMockData, getCachedComparisonMockData } from "@/lib/mock/analytics";
 import type {
   AnalyticsData,
   AnalyticsResponse,
@@ -57,6 +57,7 @@ interface ParsedParams {
   platform: string;
   timeRange: string;
   days: number;
+  isComparison: boolean;
 }
 
 /**
@@ -68,8 +69,9 @@ function parseParams(request: NextRequest): ParsedParams {
   const platform = searchParams.get("platform") || "all";
   const timeRange = searchParams.get("timeRange") || "30d";
   const days = parseTimeRange(timeRange);
+  const isComparison = searchParams.get("comparison") === "true";
 
-  return { category, platform, timeRange, days };
+  return { category, platform, timeRange, days, isComparison };
 }
 
 /**
@@ -157,7 +159,7 @@ export async function GET(
   request: NextRequest
 ): Promise<NextResponse<AnalyticsResponse | UnifiedAnalyticsResponse>> {
   try {
-    const { category, platform, days } = parseParams(request);
+    const { category, platform, days, isComparison } = parseParams(request);
 
     // Validate category parameter
     if (!VALID_CATEGORIES.includes(category as ValidCategory)) {
@@ -186,7 +188,10 @@ export async function GET(
       // Unified mode - return specific category or all
       // Note: `days` parameter is intentionally unused here. Unified mode always
       // returns 30-day data. See getUnifiedMockData() for rationale.
-      const unifiedData = getCachedUnifiedMockData();
+      // When isComparison is true, return data with lower values to simulate previous period.
+      const unifiedData = isComparison
+        ? getCachedComparisonMockData()
+        : getCachedUnifiedMockData();
 
       // Filter to specific category if requested
       if (category !== "all") {

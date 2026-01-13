@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import useSWR from 'swr';
 import { analyticsFetcher } from '@/lib/fetchers';
-import type { Platform, TimeRange, AnalyticsQueryParams, FilterState } from '@/types';
+import type { Platform, TimeRange, AnalyticsQueryParams, FilterState, ComparisonConfig } from '@/types';
 import type { UnifiedAnalyticsData, TrafficSource, CampaignChannel } from '@/types/analytics';
 
 /**
@@ -14,6 +14,8 @@ export interface UseAnalyticsParams {
   timeRange?: TimeRange;
   /** Active filters for the data */
   filters?: FilterState;
+  /** Comparison configuration for period-over-period analysis */
+  comparison?: ComparisonConfig;
   /** Whether to fetch data. When false, the hook will not make any requests. */
   enabled?: boolean;
 }
@@ -24,6 +26,10 @@ export interface UseAnalyticsParams {
 export interface UseAnalyticsReturn {
   /** The fetched analytics data, undefined while loading or on error */
   data: UnifiedAnalyticsData | undefined;
+  /** Comparison period analytics data, undefined if comparison disabled or loading */
+  comparisonData: UnifiedAnalyticsData | undefined;
+  /** Active comparison configuration */
+  comparison: ComparisonConfig | undefined;
   /** Error object if the request failed */
   error: Error | undefined;
   /** True during initial load when there is no data yet */
@@ -60,6 +66,22 @@ export interface UseAnalyticsReturn {
  * });
  * ```
  */
+/**
+ * Calculate comparison time range based on current range and comparison period.
+ */
+function getComparisonTimeRange(
+  timeRange: TimeRange | undefined,
+  comparison: ComparisonConfig | undefined
+): TimeRange | undefined {
+  if (!comparison?.enabled || !timeRange) return undefined;
+
+  // For comparison, we use the same time range duration
+  // The API will calculate the previous period based on the timeRange
+  // For year_ago comparison, we'd need custom date handling
+  // For now, we return the same timeRange - the mock data generator handles this
+  return timeRange;
+}
+
 /**
  * Apply filters to analytics data client-side.
  */
@@ -141,7 +163,7 @@ function applyFilters(
 }
 
 export function useAnalytics(params: UseAnalyticsParams = {}): UseAnalyticsReturn {
-  const { platform, timeRange, filters, enabled = true } = params;
+  const { platform, timeRange, filters, comparison, enabled = true } = params;
 
   // Memoize query params to prevent new object reference on every render
   // This ensures SWR key stability and proper cache deduplication
@@ -150,13 +172,43 @@ export function useAnalytics(params: UseAnalyticsParams = {}): UseAnalyticsRetur
     [platform, timeRange]
   );
 
+  // Calculate comparison time range
+  const comparisonTimeRange = useMemo(
+    () => getComparisonTimeRange(timeRange, comparison),
+    [timeRange, comparison]
+  );
+
+  // Comparison query params (uses previous period or year ago logic)
+  // Sets comparison: true to get different mock data for comparison
+  const comparisonQueryParams = useMemo<AnalyticsQueryParams | undefined>(
+    () => comparisonTimeRange ? { platform, timeRange: comparisonTimeRange, comparison: true } : undefined,
+    [platform, comparisonTimeRange]
+  );
+
   // SWR key is null when disabled (prevents fetching)
   const swrKey = enabled ? (['analytics', queryParams] as const) : null;
+
+  // Comparison SWR key - only active when comparison is enabled
+  // Using a unique key suffix to differentiate from main data
+  const comparisonSwrKey = enabled && comparison?.enabled
+    ? (['analytics-comparison', comparisonQueryParams, comparison.period] as const)
+    : null;
 
   const { data: rawData, error, isLoading, isValidating, mutate } = useSWR<
     UnifiedAnalyticsData | undefined,
     Error
   >(swrKey, analyticsFetcher);
+
+  // Fetch comparison data when enabled
+  const {
+    data: rawComparisonData,
+    isLoading: isComparisonLoading,
+    isValidating: isComparisonValidating,
+  } = useSWR<UnifiedAnalyticsData | undefined, Error>(
+    comparisonSwrKey,
+    // Use the same fetcher - it ignores the suffix in the key
+    ([, params]) => analyticsFetcher(['analytics', params as AnalyticsQueryParams | undefined])
+  );
 
   // Apply client-side filters to the data
   const data = useMemo(
@@ -164,17 +216,29 @@ export function useAnalytics(params: UseAnalyticsParams = {}): UseAnalyticsRetur
     [rawData, filters]
   );
 
+  // Apply filters to comparison data
+  const comparisonData = useMemo(
+    () => applyFilters(rawComparisonData, filters),
+    [rawComparisonData, filters]
+  );
+
+  // Combined loading/validating states
+  const combinedIsLoading = isLoading || (comparison?.enabled ? isComparisonLoading : false);
+  const combinedIsValidating = isValidating || (comparison?.enabled ? isComparisonValidating : false);
+
   // Memoize return object to prevent unnecessary re-renders in consuming components
   return useMemo(
     () => ({
       data,
+      comparisonData: comparison?.enabled ? comparisonData : undefined,
+      comparison,
       error,
-      isLoading,
-      isValidating,
+      isLoading: combinedIsLoading,
+      isValidating: combinedIsValidating,
       isError: !!error,
       refresh: mutate,
     }),
-    [data, error, isLoading, isValidating, mutate]
+    [data, comparisonData, comparison, error, combinedIsLoading, combinedIsValidating, mutate]
   );
 }
 

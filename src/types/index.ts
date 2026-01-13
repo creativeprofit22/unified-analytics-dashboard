@@ -12,6 +12,9 @@
 export type {
   // Core Shared Types
   TimeRange,
+  CustomDateRange,
+  ComparisonPeriod,
+  ComparisonConfig,
   ChangeType,
   Metric,
   TrendDataPoint,
@@ -102,7 +105,7 @@ export type {
   FilterOptions,
 } from "./analytics";
 
-export { DEFAULT_FILTER_STATE } from "./analytics";
+export { DEFAULT_FILTER_STATE, DEFAULT_COMPARISON_CONFIG } from "./analytics";
 
 // =============================================================================
 // LEGACY SOCIAL MEDIA TYPES (Backward Compatibility)

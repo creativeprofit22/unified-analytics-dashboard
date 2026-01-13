@@ -3,7 +3,7 @@
 import { useEffect, useCallback } from "react";
 import { useAnalytics } from "@/hooks";
 import { useFilters } from "@/contexts/FilterContext";
-import type { TimeRange, TrafficSource, CampaignChannel } from "@/types/analytics";
+import type { TimeRange, TrafficSource, CampaignChannel, ComparisonConfig } from "@/types/analytics";
 import { cn } from "@/utils/cn";
 import { TabNavigation, TabPanel, type TabId } from "@/components";
 import {
@@ -21,6 +21,7 @@ import {
 
 interface DashboardProps {
   timeRange?: TimeRange;
+  comparison?: ComparisonConfig;
   className?: string;
   syncHash?: boolean;
 }
@@ -47,9 +48,9 @@ function ErrorDisplay({ message }: { message: string }) {
   );
 }
 
-export function Dashboard({ timeRange = "30d", className, syncHash = false }: DashboardProps) {
+export function Dashboard({ timeRange = "30d", comparison, className, syncHash = false }: DashboardProps) {
   const { filters, setOptions, activeTab, setActiveTab } = useFilters();
-  const { data, isLoading, error } = useAnalytics({ timeRange, filters });
+  const { data, comparisonData, isLoading, error } = useAnalytics({ timeRange, filters, comparison });
 
   const handleTabChange = useCallback((tabId: TabId) => {
     setActiveTab(tabId);
@@ -107,31 +108,31 @@ export function Dashboard({ timeRange = "30d", className, syncHash = false }: Da
       />
 
       <TabPanel tabId="acquisition" activeTab={activeTab} className="space-y-6">
-        <TrafficSection data={data.traffic} />
-        <SEOSection data={data.seo} />
+        <TrafficSection data={data.traffic} comparisonData={comparisonData?.traffic} />
+        <SEOSection data={data.seo} comparisonData={comparisonData?.seo} />
       </TabPanel>
 
       <TabPanel tabId="conversions" activeTab={activeTab} className="space-y-6">
-        <ConversionsSection data={data.conversions} />
+        <ConversionsSection data={data.conversions} comparisonData={comparisonData?.conversions} />
       </TabPanel>
 
       <TabPanel tabId="revenue" activeTab={activeTab} className="space-y-6">
-        <RevenueSection data={data.revenue} />
-        <SubscriptionsSection data={data.subscriptions} />
-        <PaymentsSection data={data.payments} />
+        <RevenueSection data={data.revenue} comparisonData={comparisonData?.revenue} />
+        <SubscriptionsSection data={data.subscriptions} comparisonData={comparisonData?.subscriptions} />
+        <PaymentsSection data={data.payments} comparisonData={comparisonData?.payments} />
       </TabPanel>
 
       <TabPanel tabId="economics" activeTab={activeTab} className="space-y-6">
-        <UnitEconomicsSection data={data.unitEconomics} />
+        <UnitEconomicsSection data={data.unitEconomics} comparisonData={comparisonData?.unitEconomics} />
       </TabPanel>
 
       <TabPanel tabId="audience" activeTab={activeTab} className="space-y-6">
-        <DemographicsSection data={data.demographics} />
-        <SegmentationSection data={data.segmentation} />
+        <DemographicsSection data={data.demographics} comparisonData={comparisonData?.demographics} />
+        <SegmentationSection data={data.segmentation} comparisonData={comparisonData?.segmentation} />
       </TabPanel>
 
       <TabPanel tabId="marketing" activeTab={activeTab} className="space-y-6">
-        <CampaignsSection data={data.campaigns} />
+        <CampaignsSection data={data.campaigns} comparisonData={comparisonData?.campaigns} />
       </TabPanel>
     </div>
   );

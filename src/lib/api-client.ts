@@ -192,6 +192,7 @@ export const analyticsClient = {
       timeRange: params?.timeRange,
       startDate: params?.startDate,
       endDate: params?.endDate,
+      comparison: params?.comparison ? 'true' : undefined,
     });
     return apiFetch<ApiResponse<UnifiedAnalyticsData>>(`/analytics${query}`);
   },

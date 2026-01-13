@@ -1,6 +1,6 @@
 "use client";
 
-import type { UnifiedAnalyticsData } from "@/types/analytics";
+import type { UnifiedAnalyticsData, SubscriptionMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
 import { BarComparisonChart, type BarComparisonDataItem } from "@/components/charts/BarComparisonChart";
@@ -8,6 +8,20 @@ import { SectionHeader, createMetric } from "../shared";
 
 interface SubscriptionsSectionProps {
   data: UnifiedAnalyticsData["subscriptions"];
+  comparisonData?: UnifiedAnalyticsData["subscriptions"];
+}
+
+/** Get comparison value or calculate a fallback */
+function getComparisonValue(
+  comparisonData: SubscriptionMetrics | undefined,
+  field: keyof SubscriptionMetrics,
+  currentValue: number,
+  fallbackRatio = 0.9
+): number {
+  if (comparisonData && typeof comparisonData[field] === 'number') {
+    return comparisonData[field] as number;
+  }
+  return currentValue * fallbackRatio;
 }
 
 function MetricGrid({ children }: { children: React.ReactNode }) {
@@ -18,7 +32,7 @@ function MetricGrid({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function SubscriptionsSection({ data }: SubscriptionsSectionProps) {
+export function SubscriptionsSection({ data, comparisonData }: SubscriptionsSectionProps) {
   if (!data) return null;
 
   const mrrChartData: BarComparisonDataItem[] = data.mrrMovement
@@ -38,42 +52,42 @@ export function SubscriptionsSection({ data }: SubscriptionsSectionProps) {
       <MetricGrid>
         <MetricCard
           title="Active Subscribers"
-          metric={createMetric(data.activeSubscribers, data.activeSubscribers * 0.95)}
+          metric={createMetric(data.activeSubscribers, getComparisonValue(comparisonData, "activeSubscribers", data.activeSubscribers, 0.95))}
           format="number"
         />
         <MetricCard
           title="New Subscribers"
-          metric={createMetric(data.newSubscribers, data.newSubscribers * 0.88)}
+          metric={createMetric(data.newSubscribers, getComparisonValue(comparisonData, "newSubscribers", data.newSubscribers, 0.88))}
           format="number"
         />
         <MetricCard
           title="MRR"
-          metric={createMetric(data.mrr, data.mrr * 0.9)}
+          metric={createMetric(data.mrr, getComparisonValue(comparisonData, "mrr", data.mrr, 0.9))}
           format="currency"
         />
         <MetricCard
           title="ARR"
-          metric={createMetric(data.arr, data.arr * 0.9)}
+          metric={createMetric(data.arr, getComparisonValue(comparisonData, "arr", data.arr, 0.9))}
           format="currency"
         />
         <MetricCard
           title="Monthly Churn"
-          metric={createMetric(data.churnRate.monthly, data.churnRate.monthly * 1.1)}
+          metric={createMetric(data.churnRate.monthly, comparisonData?.churnRate?.monthly ?? data.churnRate.monthly * 1.1)}
           format="percent"
         />
         <MetricCard
           title="Retention Rate"
-          metric={createMetric(data.retentionRate, data.retentionRate * 0.98)}
+          metric={createMetric(data.retentionRate, getComparisonValue(comparisonData, "retentionRate", data.retentionRate, 0.98))}
           format="percent"
         />
         <MetricCard
           title="Trial to Paid"
-          metric={createMetric(data.trialToPaidRate, data.trialToPaidRate * 0.92)}
+          metric={createMetric(data.trialToPaidRate, getComparisonValue(comparisonData, "trialToPaidRate", data.trialToPaidRate, 0.92))}
           format="percent"
         />
         <MetricCard
           title="Subscriber LTV"
-          metric={createMetric(data.subscriberLtv, data.subscriberLtv * 0.95)}
+          metric={createMetric(data.subscriberLtv, getComparisonValue(comparisonData, "subscriberLtv", data.subscriberLtv, 0.95))}
           format="currency"
         />
       </MetricGrid>

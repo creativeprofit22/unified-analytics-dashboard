@@ -1,12 +1,26 @@
 "use client";
 
-import type { UnifiedAnalyticsData } from "@/types/analytics";
+import type { UnifiedAnalyticsData, CampaignMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
 import { DataTable, SectionHeader, createMetric, type Column } from "../shared";
 
 interface CampaignsSectionProps {
   data: UnifiedAnalyticsData["campaigns"];
+  comparisonData?: UnifiedAnalyticsData["campaigns"];
+}
+
+/** Get comparison value or calculate a fallback */
+function getComparisonValue<T extends object>(
+  comparisonData: T | undefined,
+  field: keyof T,
+  currentValue: number,
+  fallbackRatio = 0.9
+): number {
+  if (comparisonData && typeof comparisonData[field] === 'number') {
+    return comparisonData[field] as number;
+  }
+  return currentValue * fallbackRatio;
 }
 
 function MetricGrid({ children }: { children: React.ReactNode }) {
@@ -62,7 +76,7 @@ const campaignColumns: Column<CampaignRow>[] = [
   },
 ];
 
-export function CampaignsSection({ data }: CampaignsSectionProps) {
+export function CampaignsSection({ data, comparisonData }: CampaignsSectionProps) {
   if (!data) return null;
 
   return (
@@ -73,42 +87,42 @@ export function CampaignsSection({ data }: CampaignsSectionProps) {
       <MetricGrid>
         <MetricCard
           title="Sent"
-          metric={createMetric(data.summary.sent, data.summary.sent * 0.9)}
+          metric={createMetric(data.summary.sent, getComparisonValue(comparisonData?.summary, 'sent', data.summary.sent, 0.9))}
           format="number"
         />
         <MetricCard
           title="Delivery Rate"
-          metric={createMetric(data.summary.deliveryRate, data.summary.deliveryRate * 0.99)}
+          metric={createMetric(data.summary.deliveryRate, getComparisonValue(comparisonData?.summary, 'deliveryRate', data.summary.deliveryRate, 0.99))}
           format="percent"
         />
         <MetricCard
           title="Open Rate"
-          metric={createMetric(data.engagement.openRate, data.engagement.openRate * 0.95)}
+          metric={createMetric(data.engagement.openRate, getComparisonValue(comparisonData?.engagement, 'openRate', data.engagement.openRate, 0.95))}
           format="percent"
         />
         <MetricCard
           title="CTR"
-          metric={createMetric(data.engagement.ctr, data.engagement.ctr * 0.92)}
+          metric={createMetric(data.engagement.ctr, getComparisonValue(comparisonData?.engagement, 'ctr', data.engagement.ctr, 0.92))}
           format="percent"
         />
         <MetricCard
           title="Conversions"
-          metric={createMetric(data.conversions.count, data.conversions.count * 0.88)}
+          metric={createMetric(data.conversions.count, getComparisonValue(comparisonData?.conversions, 'count', data.conversions.count, 0.88))}
           format="number"
         />
         <MetricCard
           title="Revenue"
-          metric={createMetric(data.conversions.revenue, data.conversions.revenue * 0.85)}
+          metric={createMetric(data.conversions.revenue, getComparisonValue(comparisonData?.conversions, 'revenue', data.conversions.revenue, 0.85))}
           format="currency"
         />
         <MetricCard
           title="ROI"
-          metric={createMetric(data.conversions.roi, data.conversions.roi * 0.9)}
+          metric={createMetric(data.conversions.roi, getComparisonValue(comparisonData?.conversions, 'roi', data.conversions.roi, 0.9))}
           format="percent"
         />
         <MetricCard
           title="Unsubscribe Rate"
-          metric={createMetric(data.negative.unsubscribeRate, data.negative.unsubscribeRate * 1.1)}
+          metric={createMetric(data.negative.unsubscribeRate, getComparisonValue(comparisonData?.negative, 'unsubscribeRate', data.negative.unsubscribeRate, 1.1))}
           format="percent"
         />
       </MetricGrid>

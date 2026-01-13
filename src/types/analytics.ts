@@ -34,6 +34,33 @@ export interface CustomDateRange {
 }
 
 /**
+ * Comparison period types for period-over-period analysis.
+ */
+export type ComparisonPeriod = 'previous' | 'year_ago' | 'custom' | 'none';
+
+/**
+ * Comparison configuration for the dashboard.
+ */
+export interface ComparisonConfig {
+  /** Whether comparison mode is enabled */
+  enabled: boolean;
+  /** The comparison period type */
+  period: ComparisonPeriod;
+  /** Custom date range for the current period (used when period is 'custom') */
+  currentRange?: CustomDateRange;
+  /** Custom date range for the comparison period (used when period is 'custom') */
+  comparisonRange?: CustomDateRange;
+}
+
+/**
+ * Default comparison configuration (disabled).
+ */
+export const DEFAULT_COMPARISON_CONFIG: ComparisonConfig = {
+  enabled: false,
+  period: 'previous',
+};
+
+/**
  * Direction of metric change between periods.
  */
 export type ChangeType = 'increase' | 'decrease' | 'stable';

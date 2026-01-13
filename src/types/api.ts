@@ -57,6 +57,8 @@ export interface AnalyticsQueryParams {
   startDate?: string;
   /** Custom end date (ISO 8601 format, overrides timeRange) */
   endDate?: string;
+  /** Whether this is a comparison period request (returns previous period data) */
+  comparison?: boolean;
 }
 
 /**

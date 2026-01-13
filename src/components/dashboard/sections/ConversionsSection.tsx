@@ -1,12 +1,26 @@
 "use client";
 
-import type { UnifiedAnalyticsData } from "@/types/analytics";
+import type { UnifiedAnalyticsData, ConversionMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
 import { SectionHeader, createMetric } from "../shared";
 
 interface ConversionsSectionProps {
   data: UnifiedAnalyticsData["conversions"];
+  comparisonData?: UnifiedAnalyticsData["conversions"];
+}
+
+/** Get comparison value or calculate a fallback */
+function getComparisonValue(
+  comparisonData: ConversionMetrics | undefined,
+  field: keyof ConversionMetrics,
+  currentValue: number,
+  fallbackRatio = 0.9
+): number {
+  if (comparisonData && typeof comparisonData[field] === 'number') {
+    return comparisonData[field] as number;
+  }
+  return currentValue * fallbackRatio;
 }
 
 function MetricGrid({ children }: { children: React.ReactNode }) {
@@ -17,7 +31,7 @@ function MetricGrid({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function ConversionsSection({ data }: ConversionsSectionProps) {
+export function ConversionsSection({ data, comparisonData }: ConversionsSectionProps) {
   if (!data) return null;
 
   return (
@@ -28,24 +42,24 @@ export function ConversionsSection({ data }: ConversionsSectionProps) {
       <MetricGrid>
         <MetricCard
           title="Conversion Rate"
-          metric={createMetric(data.conversionRate, data.conversionRate * 0.92)}
+          metric={createMetric(data.conversionRate, getComparisonValue(comparisonData, "conversionRate", data.conversionRate, 0.92))}
           format="percent"
         />
         <MetricCard
           title="Total Conversions"
-          metric={createMetric(data.totalConversions, data.totalConversions * 0.88)}
+          metric={createMetric(data.totalConversions, getComparisonValue(comparisonData, "totalConversions", data.totalConversions, 0.88))}
           format="number"
         />
         <MetricCard
           title="Add to Cart Rate"
-          metric={createMetric(data.addToCartRate, data.addToCartRate * 0.95)}
+          metric={createMetric(data.addToCartRate, getComparisonValue(comparisonData, "addToCartRate", data.addToCartRate, 0.95))}
           format="percent"
         />
         <MetricCard
           title="Cart Abandonment"
           metric={createMetric(
             data.cartAbandonmentRate,
-            data.cartAbandonmentRate * 1.05
+            getComparisonValue(comparisonData, "cartAbandonmentRate", data.cartAbandonmentRate, 1.05)
           )}
           format="percent"
         />
@@ -53,7 +67,7 @@ export function ConversionsSection({ data }: ConversionsSectionProps) {
           title="Checkout Completion"
           metric={createMetric(
             data.checkoutCompletionRate,
-            data.checkoutCompletionRate * 0.9
+            getComparisonValue(comparisonData, "checkoutCompletionRate", data.checkoutCompletionRate, 0.9)
           )}
           format="percent"
         />

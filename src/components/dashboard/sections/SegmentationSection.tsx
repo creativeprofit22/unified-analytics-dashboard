@@ -6,6 +6,7 @@ import { StatCard, DataTable, SectionHeader, type Column } from "../shared";
 
 interface SegmentationSectionProps {
   data: UnifiedAnalyticsData["segmentation"];
+  comparisonData?: UnifiedAnalyticsData["segmentation"];
 }
 
 interface PlanRow {
@@ -44,7 +45,26 @@ const planColumns: Column<PlanRow>[] = [
   },
 ];
 
-export function SegmentationSection({ data }: SegmentationSectionProps) {
+// Helper to find comparison value for behavioral segments
+function findBehaviorComparison(
+  comparisonData: UnifiedAnalyticsData["segmentation"] | undefined,
+  segment: string
+): number | undefined {
+  if (!comparisonData?.byBehavior) return undefined;
+  const match = comparisonData.byBehavior.find((s) => s.segment === segment);
+  return match?.users;
+}
+
+// Helper to find comparison value for lifecycle stages
+function findLifecycleComparison(
+  comparisonData: UnifiedAnalyticsData["segmentation"] | undefined,
+  stage: string
+): number | undefined {
+  if (!comparisonData?.byLifecycle) return undefined;
+  return comparisonData.byLifecycle[stage as keyof typeof comparisonData.byLifecycle];
+}
+
+export function SegmentationSection({ data, comparisonData }: SegmentationSectionProps) {
   if (!data) return null;
 
   return (

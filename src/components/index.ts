@@ -6,6 +6,8 @@ export { MetricCard, type MetricCardProps } from "./MetricCard";
 export { TrendChart, type TrendDataPoint } from "./TrendChart";
 export { CategorySection } from "./CategorySection";
 export { TimeRangePicker, type TimeRangePickerProps } from "./TimeRangePicker";
+export { ComparisonToggle, type ComparisonToggleProps } from "./ComparisonToggle";
+export { ComparisonView } from "./ComparisonView";
 export { ThemeToggle } from "./ThemeToggle";
 export { FilterPanel } from "./FilterPanel";
 export { FilterChip } from "./FilterChip";

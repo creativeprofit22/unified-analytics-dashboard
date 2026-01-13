@@ -765,6 +765,51 @@ export function getCachedUnifiedMockData(): UnifiedAnalyticsData {
 }
 
 /**
+ * Apply a variation factor to numeric values in an object (recursive).
+ * Used to generate "previous period" data for comparison mode.
+ */
+function applyVariation<T>(obj: T, factor: number): T {
+  if (obj === null || obj === undefined) return obj;
+  if (typeof obj === 'number') {
+    // Apply variation: multiply by factor, add some randomness
+    const variation = 0.9 + Math.random() * 0.2; // 0.9 to 1.1
+    return (obj * factor * variation) as T;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map(item => applyVariation(item, factor)) as T;
+  }
+  if (typeof obj === 'object') {
+    const result: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      // Skip non-numeric fields that shouldn't be modified
+      if (key === 'date' || key === 'id' || key === 'name' || key === 'url' ||
+          key === 'path' || key === 'keyword' || key === 'query' || key === 'campaign' ||
+          key === 'channel' || key === 'segment' || key === 'plan' || key === 'niche' ||
+          key === 'cohort' || key === 'timeRange' || key === 'fetchedAt' ||
+          key === 'country' || key === 'countryCode' || key === 'region' || key === 'city' ||
+          key === 'model' || key === 'resolution' || key === 'language' || key === 'interest' ||
+          key === 'sentAt' || key === 'productId' || key === 'productName') {
+        result[key] = value;
+      } else {
+        result[key] = applyVariation(value, factor);
+      }
+    }
+    return result as T;
+  }
+  return obj;
+}
+
+/**
+ * Get comparison mock data with values adjusted to simulate a previous period.
+ * Values are generally lower (factor 0.85) to show growth in current period.
+ */
+export function getCachedComparisonMockData(): UnifiedAnalyticsData {
+  const baseData = getCachedUnifiedMockData();
+  // Apply 0.85 factor to simulate "previous period" being ~15% lower
+  return applyVariation(baseData, 0.85);
+}
+
+/**
  * Get cached legacy mock data for a given number of days.
  * Uses globalThis for hot reload resilience.
  */
