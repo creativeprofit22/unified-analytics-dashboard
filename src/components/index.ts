@@ -13,6 +13,8 @@ export { FilterPanel } from "./FilterPanel";
 export { FilterChip } from "./FilterChip";
 export { ExportButton } from "./ExportButton";
 export { ExportModal } from "./ExportModal";
+export { SettingsButton } from "./SettingsButton";
+export { SettingsModal, type SettingsModalProps } from "./SettingsModal";
 export { TabNavigation, DASHBOARD_TABS, type TabId, type Tab, type TabNavigationProps } from "./TabNavigation";
 export { TabPanel, type TabPanelProps } from "./TabPanel";
 

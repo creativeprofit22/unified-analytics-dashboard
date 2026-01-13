@@ -15,6 +15,11 @@ export type {
   CustomDateRange,
   ComparisonPeriod,
   ComparisonConfig,
+  // User Preferences
+  Theme,
+  AutoRefreshInterval,
+  ExportFormat,
+  UserPreferences,
   ChangeType,
   Metric,
   TrendDataPoint,
@@ -105,7 +110,7 @@ export type {
   FilterOptions,
 } from "./analytics";
 
-export { DEFAULT_FILTER_STATE, DEFAULT_COMPARISON_CONFIG } from "./analytics";
+export { DEFAULT_FILTER_STATE, DEFAULT_COMPARISON_CONFIG, DEFAULT_USER_PREFERENCES } from "./analytics";
 
 // =============================================================================
 // LEGACY SOCIAL MEDIA TYPES (Backward Compatibility)

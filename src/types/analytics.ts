@@ -60,6 +60,58 @@ export const DEFAULT_COMPARISON_CONFIG: ComparisonConfig = {
   period: 'previous',
 };
 
+// =============================================================================
+// USER PREFERENCES
+// =============================================================================
+
+/**
+ * Theme preference options.
+ */
+export type Theme = 'light' | 'dark' | 'system';
+
+/**
+ * Auto-refresh interval options in milliseconds.
+ */
+export type AutoRefreshInterval = 0 | 30000 | 60000 | 300000;
+
+/**
+ * Export format options.
+ */
+export type ExportFormat = 'csv' | 'json' | 'xlsx';
+
+/**
+ * User preferences for dashboard behavior and display.
+ */
+export interface UserPreferences {
+  /** Default time range when loading dashboard */
+  defaultTimeRange: TimeRange;
+  /** Default comparison period */
+  defaultComparisonPeriod: ComparisonPeriod;
+  /** Whether to enable comparison mode by default */
+  showComparisonByDefault: boolean;
+  /** Auto-refresh interval (0 = disabled) */
+  autoRefreshInterval: AutoRefreshInterval;
+  /** Preferred export format */
+  exportFormat: ExportFormat;
+  /** Show notifications for data updates */
+  showNotifications: boolean;
+  /** Compact mode for dense data display */
+  compactMode: boolean;
+}
+
+/**
+ * Default user preferences.
+ */
+export const DEFAULT_USER_PREFERENCES: UserPreferences = {
+  defaultTimeRange: '30d',
+  defaultComparisonPeriod: 'previous',
+  showComparisonByDefault: false,
+  autoRefreshInterval: 0,
+  exportFormat: 'csv',
+  showNotifications: true,
+  compactMode: false,
+};
+
 /**
  * Direction of metric change between periods.
  */

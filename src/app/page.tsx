@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Dashboard, TimeRangePicker, ThemeToggle, FilterPanel, ExportButton, ComparisonToggle, ComparisonView } from "@/components";
+import { Dashboard, TimeRangePicker, ThemeToggle, FilterPanel, ExportButton, ComparisonToggle, ComparisonView, SettingsButton } from "@/components";
 import { useAnalytics } from "@/hooks";
 import { useFilters } from "@/contexts/FilterContext";
 import type { TimeRange, CustomDateRange, ComparisonConfig } from "@/types/analytics";
@@ -46,6 +46,7 @@ export default function HomePage() {
               <ExportButton data={data ?? null} />
               <FilterPanel />
               <ThemeToggle />
+              <SettingsButton />
               {!comparison.enabled && (
                 <TimeRangePicker
                   value={timeRange}

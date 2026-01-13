@@ -2,42 +2,46 @@
 
 ## Pipeline State
 Phase: build
-Feature: Recharts Integration
-Features-Remaining: 9
+Feature: (select next)
+Features-Remaining: 4
 
 ## UI Roadmap
 
-### In Progress
-- **Recharts Integration** - Replace custom SVG TrendChart with interactive Recharts
+### Completed
+- **ECharts Integration** - Replaced custom SVG TrendChart with interactive ECharts (2026-01-12)
+- **Interactive Tooltips** - Hover states on charts showing exact values, dates, % change
+- **Comparison Mode** - ComparisonToggle, ComparisonView, period-over-period UI
+- **Source/Segment Filters** - FilterPanel, FilterChip components
+- **Export (CSV/PDF)** - ExportButton, ExportModal components
+- **Time Range UI Selector** - TimeRangePicker with presets + custom range
+- **Dashboard UI Components** - MetricCard, CategorySection, 10 section files
+- **Tab Navigation** - TabNavigation, TabPanel components
+- **Theme Toggle** - ThemeToggle component
 
 ### Pending (Priority Order)
-1. **Interactive Tooltips** - Hover states on charts showing exact values, dates
-2. **Comparison Mode** - Period-over-period UI (vs last 30d, vs last year)
-3. **Source/Segment Filters** - Filter dashboard by traffic source, campaign, segment
-4. **Table Search/Filter** - Search and sort within DataTable components
-5. **Export (CSV/PDF)** - Download reports functionality
-6. **Real-time Updates** - WebSocket/polling for live data refresh
-7. **Embed Mode** - iframe-optimized view with postMessage API
-8. **Authentication** - JWT/session management for production
-9. **Settings Page** - User preferences (theme, default time range, etc.)
+1. **Real-time Updates** - WebSocket/polling for live data refresh
+2. **Embed Mode** - iframe-optimized view with postMessage API
+3. **Authentication** - JWT/session management for production
+4. **Settings Page** - User preferences (theme, default time range, etc.)
 
 ## Last Session (2026-01-12)
-**Feature**: Time Range UI Selector - BUILT
-- Created TimeRangePicker.tsx with presets (7D/30D/90D/12M/YTD/Custom)
-- Extended TimeRange type to include 'ytd', '12m', 'custom'
-- Added CustomDateRange interface
-- Integrated with page.tsx state management
-- Mobile-responsive (dropdown on mobile, button group on desktop)
+**Feature**: ECharts TrendChart - BUILT
+- Replaced custom SVG TrendChart with ECharts implementation
+- Added interactive tooltips (date, value, % change vs previous)
+- Cross-hair axis pointer, gradient area fill, hover emphasis
+- Consistent styling with AreaTrendChart, PieDistributionChart, BarComparisonChart
 - TypeCheck: PASS
 
-## Previous Session (2026-01-12)
-**Feature**: Dashboard UI Components - VALIDATED & REFACTORED
-- Built: MetricCard, TrendChart, CategorySection, Dashboard (10 analytics categories)
-- Fixed 6 critical/high bugs
-- Split 1040-line Dashboard.tsx into 10 section files + 4 shared components
+## Previous Sessions
+- **Time Range UI Selector**: Built TimeRangePicker with presets (2026-01-12)
+- **Dashboard UI Components**: Built, validated, refactored - split into 10 sections (2026-01-12)
 
 ## Completed Features
+- **ECharts TrendChart**: Built (2026-01-12)
 - **Time Range UI Selector**: Built (2026-01-12)
+- **Comparison Mode**: ComparisonToggle, ComparisonView (2026-01-12)
+- **Filters**: FilterPanel, FilterChip (2026-01-12)
+- **Export**: ExportButton, ExportModal (2026-01-12)
 - **Dashboard UI Components**: Built, validated, refactored (2026-01-12)
 - **Complete Analytics Types**: Built 74 types, validated, refactored (2026-01-12)
 - **Data Hooks**: useAnalytics, usePlatformAnalytics, useHealthCheck (2026-01-12)

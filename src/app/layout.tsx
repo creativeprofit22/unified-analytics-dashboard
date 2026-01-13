@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { FilterProvider } from "@/contexts/FilterContext";
+import { SettingsProvider } from "@/contexts/SettingsContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -28,7 +29,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider>
-          <FilterProvider>{children}</FilterProvider>
+          <SettingsProvider>
+            <FilterProvider>{children}</FilterProvider>
+          </SettingsProvider>
         </ThemeProvider>
       </body>
     </html>
