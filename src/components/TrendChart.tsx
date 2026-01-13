@@ -1,4 +1,7 @@
-import { useId, useMemo } from "react";
+"use client";
+
+import ReactECharts from "echarts-for-react";
+import type { EChartsOption } from "echarts";
 import { cn } from "@/utils/cn";
 
 export interface TrendDataPoint {
@@ -13,9 +16,20 @@ interface TrendChartProps {
   className?: string;
 }
 
-// Extracted constants to avoid recreating objects on each render
-const CHART_PADDING = 8;
-const DOT_RADIUS = 4;
+function formatDate(dateStr: string): string {
+  const date = new Date(dateStr);
+  return `${date.getMonth() + 1}/${date.getDate()}`;
+}
+
+function formatValue(value: number): string {
+  if (value >= 1_000_000) {
+    return `${(value / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+  }
+  if (value >= 1_000) {
+    return `${(value / 1_000).toFixed(1).replace(/\.0$/, "")}K`;
+  }
+  return value.toLocaleString();
+}
 
 export function TrendChart({
   data,
@@ -23,64 +37,6 @@ export function TrendChart({
   color = "#3b82f6",
   className,
 }: TrendChartProps) {
-
-  // Use React's useId for SSR-safe unique ID generation
-  const uniqueId = useId();
-  const gradientId = `trend-gradient-${uniqueId}`;
-
-  const { path, gradientPath, points, viewBox } = useMemo(() => {
-    if (!data || data.length === 0) {
-      return { path: "", gradientPath: "", points: [], viewBox: "0 0 100 100" };
-    }
-
-    const values = data.map((d) => d.value);
-    const minValue = Math.min(...values);
-    const maxValue = Math.max(...values);
-    const valueRange = maxValue - minValue || 1; // Prevent division by zero
-
-    // Use a fixed viewBox width for calculations
-    const viewBoxWidth = 400;
-    const viewBoxHeight = height;
-
-    const chartWidth = viewBoxWidth - CHART_PADDING * 2;
-    const chartHeight = viewBoxHeight - CHART_PADDING * 2;
-
-    // Calculate normalized points
-    const calculatedPoints = data.map((point, index) => {
-      const x =
-        CHART_PADDING +
-        (data.length > 1 ? (index / (data.length - 1)) * chartWidth : chartWidth / 2);
-      const y =
-        CHART_PADDING +
-        chartHeight -
-        ((point.value - minValue) / valueRange) * chartHeight;
-
-      return { x, y, ...point };
-    });
-
-    // Generate SVG path for the line
-    const linePath = calculatedPoints
-      .map((point, index) => {
-        const command = index === 0 ? "M" : "L";
-        return `${command} ${point.x.toFixed(2)} ${point.y.toFixed(2)}`;
-      })
-      .join(" ");
-
-    // Generate path for gradient fill (closed shape)
-    const lastPoint = calculatedPoints[calculatedPoints.length - 1];
-    const gradientFillPath =
-      calculatedPoints.length > 0 && lastPoint
-        ? `${linePath} L ${lastPoint.x.toFixed(2)} ${viewBoxHeight - CHART_PADDING} L ${CHART_PADDING} ${viewBoxHeight - CHART_PADDING} Z`
-        : "";
-
-    return {
-      path: linePath,
-      gradientPath: gradientFillPath,
-      points: calculatedPoints,
-      viewBox: `0 0 ${viewBoxWidth} ${viewBoxHeight}`,
-    };
-  }, [data, height]);
-
   if (!data || data.length === 0) {
     return (
       <div
@@ -95,63 +51,166 @@ export function TrendChart({
     );
   }
 
+  const dates = data.map((d) => d.date);
+  const values = data.map((d) => d.value);
+
+  const option: EChartsOption = {
+    tooltip: {
+      trigger: "axis",
+      backgroundColor: "var(--bg-primary, #1f2937)",
+      borderColor: "var(--border-color, rgba(255,255,255,0.1))",
+      borderWidth: 1,
+      padding: [12, 16],
+      textStyle: {
+        color: "var(--text-primary)",
+        fontSize: 13,
+      },
+      extraCssText:
+        "border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);",
+      axisPointer: {
+        type: "cross",
+        crossStyle: {
+          color: "var(--text-secondary)",
+          opacity: 0.5,
+        },
+        lineStyle: {
+          color: color,
+          opacity: 0.6,
+          type: "dashed",
+        },
+      },
+      formatter: (params: unknown) => {
+        const p = Array.isArray(params) ? params[0] : params;
+        const typedP = p as { axisValue: string; value: number; dataIndex: number };
+        const date = new Date(typedP.axisValue);
+        const dayOfWeek = date.toLocaleDateString(undefined, { weekday: "long" });
+        const formattedDate = date.toLocaleDateString(undefined, {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+
+        // Calculate comparison to previous data point
+        let comparisonHtml = "";
+        const prevIndex = typedP.dataIndex - 1;
+        if (prevIndex >= 0 && prevIndex < values.length) {
+          const prevValue = values[prevIndex]!;
+          const diff = typedP.value - prevValue;
+          const percentChange = prevValue !== 0 ? ((diff / prevValue) * 100).toFixed(1) : "0.0";
+          const arrow = diff >= 0 ? "↑" : "↓";
+          const changeColor = diff >= 0 ? "#22c55e" : "#ef4444";
+          comparisonHtml = `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-color, rgba(255,255,255,0.1));">
+            <span style="color: var(--text-secondary); font-size: 12px;">vs previous:</span>
+            <span style="color: ${changeColor}; margin-left: 8px; font-weight: 500;">${arrow} ${Math.abs(Number(percentChange))}%</span>
+          </div>`;
+        }
+
+        return `<div style="min-width: 140px;">
+          <div style="color: var(--text-secondary); font-size: 12px; margin-bottom: 4px;">${dayOfWeek}</div>
+          <div style="font-weight: 600; margin-bottom: 8px;">${formattedDate}</div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--text-secondary);">Value</span>
+            <span style="font-weight: 600; color: ${color};">${formatValue(typedP.value)}</span>
+          </div>${comparisonHtml}
+        </div>`;
+      },
+    },
+    grid: {
+      left: 40,
+      right: 10,
+      top: 10,
+      bottom: 30,
+    },
+    xAxis: {
+      type: "category",
+      data: dates,
+      axisLabel: {
+        color: "var(--text-secondary)",
+        fontSize: 11,
+        formatter: (value: string) => formatDate(value),
+      },
+      axisLine: {
+        lineStyle: {
+          color: "var(--text-secondary)",
+          opacity: 0.3,
+        },
+      },
+      axisTick: {
+        lineStyle: {
+          color: "var(--text-secondary)",
+          opacity: 0.3,
+        },
+      },
+    },
+    yAxis: {
+      type: "value",
+      axisLabel: {
+        color: "var(--text-secondary)",
+        fontSize: 11,
+        formatter: (value: number) => formatValue(value),
+      },
+      axisLine: {
+        lineStyle: {
+          color: "var(--text-secondary)",
+          opacity: 0.3,
+        },
+      },
+      splitLine: { show: false },
+    },
+    animation: true,
+    animationDuration: 300,
+    animationEasing: "cubicOut",
+    series: [
+      {
+        type: "line",
+        data: values,
+        smooth: true,
+        symbol: "circle",
+        symbolSize: 6,
+        showSymbol: false,
+        lineStyle: {
+          color: color,
+          width: 2,
+        },
+        areaStyle: {
+          color: {
+            type: "linear",
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [
+              { offset: 0, color: `${color}66` },
+              { offset: 1, color: `${color}0D` },
+            ],
+          },
+        },
+        emphasis: {
+          disabled: false,
+          focus: "series",
+          scale: true,
+          itemStyle: {
+            color: "var(--bg-primary, #1f2937)",
+            borderColor: color,
+            borderWidth: 3,
+            shadowColor: `${color}80`,
+            shadowBlur: 8,
+          },
+          lineStyle: {
+            width: 3,
+          },
+        },
+      },
+    ],
+  };
+
   return (
     <div className={cn("w-full", className)}>
-      <svg
-        viewBox={viewBox}
-        preserveAspectRatio="none"
-        className="w-full"
-        style={{ height }}
-        role="img"
-        aria-label="Trend chart"
-      >
-        <defs>
-          {/* Gradient fill for area under the line */}
-          <linearGradient id={gradientId} x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor={color} stopOpacity={0.3} />
-            <stop offset="100%" stopColor={color} stopOpacity={0.05} />
-          </linearGradient>
-        </defs>
-
-        {/* Gradient fill area */}
-        {gradientPath && (
-          <path
-            d={gradientPath}
-            fill={`url(#${gradientId})`}
-            className="transition-all duration-300"
-          />
-        )}
-
-        {/* Main line */}
-        <path
-          d={path}
-          fill="none"
-          stroke={color}
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="transition-all duration-300"
-        />
-
-        {/* Data point dots */}
-        {points.map((point, index) => (
-          <circle
-            key={`${point.date}-${index}`}
-            cx={point.x}
-            cy={point.y}
-            r={DOT_RADIUS}
-            fill="var(--bg-primary, #1f2937)"
-            stroke={color}
-            strokeWidth={2}
-            className="transition-all duration-300"
-            style={{ cursor: 'pointer' }}
-          >
-            <title>
-              {new Date(point.date).toLocaleDateString()}: {point.value}
-            </title>
-          </circle>
-        ))}
-      </svg>
+      <ReactECharts
+        option={option}
+        style={{ height, width: "100%" }}
+        opts={{ renderer: "svg" }}
+      />
     </div>
   );
 }
