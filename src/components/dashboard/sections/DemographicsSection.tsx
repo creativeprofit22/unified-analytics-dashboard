@@ -2,6 +2,7 @@
 
 import type { UnifiedAnalyticsData } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
+import { BarComparisonChart, type BarComparisonDataItem } from "@/components/charts/BarComparisonChart";
 import { StatCard, SectionHeader } from "../shared";
 
 interface DemographicsSectionProps {
@@ -74,34 +75,17 @@ export function DemographicsSection({ data }: DemographicsSectionProps) {
         Object.keys(data.technology.byBrowser).length > 0 && (
           <div className="mt-4">
             <SectionHeader>Browser Distribution</SectionHeader>
-            <div className="space-y-2">
-              {Object.entries(data.technology.byBrowser)
+            <BarComparisonChart
+              data={Object.entries(data.technology.byBrowser)
                 .sort(([, a], [, b]) => b - a)
                 .slice(0, 5)
-                .map(([browser, count]) => {
-                  const total = Object.values(data.technology?.byBrowser ?? {}).reduce(
-                    (a, b) => a + b,
-                    0
-                  );
-                  const percent = total > 0 ? (count / total) * 100 : 0;
-                  return (
-                    <div key={browser} className="flex items-center gap-3">
-                      <span className="text-sm text-[var(--text-secondary)] w-24 truncate">
-                        {browser}
-                      </span>
-                      <div className="flex-1 h-2 bg-[var(--bg-secondary,rgba(255,255,255,0.05))] rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-blue-500 rounded-full"
-                          style={{ width: `${percent}%` }}
-                        />
-                      </div>
-                      <span className="text-xs text-[var(--text-secondary)] w-12 text-right">
-                        {percent.toFixed(1)}%
-                      </span>
-                    </div>
-                  );
-                })}
-            </div>
+                .map(([browser, count]): BarComparisonDataItem => ({
+                  label: browser,
+                  value: count,
+                }))}
+              height={200}
+              layout="vertical"
+            />
           </div>
         )}
     </CategorySection>

@@ -1,15 +1,7 @@
 "use client";
 
-import { useId } from "react";
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-} from "recharts";
+import ReactECharts from "echarts-for-react";
+import type { EChartsOption } from "echarts";
 
 // Re-export TrendDataPoint from TrendChart for convenience
 export type { TrendDataPoint } from "../TrendChart";
@@ -44,83 +36,121 @@ export function AreaTrendChart({
   className,
   showGrid = false,
 }: AreaTrendChartProps) {
-  // Use React's useId for SSR-safe unique ID generation
-  const uniqueId = useId();
-  const gradientId = `area-gradient-${uniqueId}`;
+  const dates = data.map((d) => d.date);
+  const values = data.map((d) => d.value);
+
+  const option: EChartsOption = {
+    tooltip: {
+      trigger: "axis",
+      backgroundColor: "var(--bg-primary, #1f2937)",
+      borderColor: "var(--text-secondary)",
+      textStyle: {
+        color: "var(--text-primary)",
+      },
+      formatter: (params: unknown) => {
+        const p = Array.isArray(params) ? params[0] : params;
+        const typedP = p as { axisValue: string; value: number };
+        const date = new Date(typedP.axisValue);
+        const formattedDate = date.toLocaleDateString(undefined, {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+        return `${formattedDate}<br/>Value: ${formatValue(typedP.value)}`;
+      },
+    },
+    grid: {
+      left: 40,
+      right: 10,
+      top: 10,
+      bottom: 30,
+    },
+    xAxis: {
+      type: "category",
+      data: dates,
+      axisLabel: {
+        color: "var(--text-secondary)",
+        fontSize: 11,
+        formatter: (value: string) => formatDate(value),
+      },
+      axisLine: {
+        lineStyle: {
+          color: "var(--text-secondary)",
+          opacity: 0.3,
+        },
+      },
+      axisTick: {
+        lineStyle: {
+          color: "var(--text-secondary)",
+          opacity: 0.3,
+        },
+      },
+    },
+    yAxis: {
+      type: "value",
+      axisLabel: {
+        color: "var(--text-secondary)",
+        fontSize: 11,
+        formatter: (value: number) => formatValue(value),
+      },
+      axisLine: {
+        lineStyle: {
+          color: "var(--text-secondary)",
+          opacity: 0.3,
+        },
+      },
+      splitLine: showGrid
+        ? {
+            lineStyle: {
+              color: "var(--text-secondary)",
+              opacity: 0.2,
+              type: "dashed",
+            },
+          }
+        : { show: false },
+    },
+    series: [
+      {
+        type: "line",
+        data: values,
+        smooth: true,
+        symbol: "none",
+        lineStyle: {
+          color: color,
+          width: 2,
+        },
+        areaStyle: {
+          color: {
+            type: "linear",
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [
+              { offset: 0, color: `${color}66` },
+              { offset: 1, color: `${color}0D` },
+            ],
+          },
+        },
+        emphasis: {
+          focus: "series",
+          itemStyle: {
+            color: "var(--bg-primary, #1f2937)",
+            borderColor: color,
+            borderWidth: 2,
+          },
+        },
+      },
+    ],
+  };
 
   return (
-    <div className={className} style={{ width: "100%", height }}>
-      <ResponsiveContainer width="100%" height="100%">
-        <AreaChart
-          data={data}
-          margin={{ top: 5, right: 10, left: -10, bottom: 5 }}
-        >
-          <defs>
-            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={color} stopOpacity={0.4} />
-              <stop offset="100%" stopColor={color} stopOpacity={0.05} />
-            </linearGradient>
-          </defs>
-          {showGrid && (
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="var(--text-secondary)"
-              opacity={0.2}
-              vertical={false}
-            />
-          )}
-          <XAxis
-            dataKey="date"
-            tickFormatter={formatDate}
-            tick={{ fill: "var(--text-secondary)", fontSize: 11 }}
-            axisLine={{ stroke: "var(--text-secondary)", opacity: 0.3 }}
-            tickLine={{ stroke: "var(--text-secondary)", opacity: 0.3 }}
-            tickMargin={8}
-          />
-          <YAxis
-            tickFormatter={formatValue}
-            tick={{ fill: "var(--text-secondary)", fontSize: 11 }}
-            axisLine={{ stroke: "var(--text-secondary)", opacity: 0.3 }}
-            tickLine={{ stroke: "var(--text-secondary)", opacity: 0.3 }}
-            width={40}
-          />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "var(--bg-primary, #1f2937)",
-              border: "1px solid var(--text-secondary)",
-              borderRadius: "8px",
-              color: "var(--text-primary)",
-            }}
-            labelStyle={{ color: "var(--text-primary)" }}
-            labelFormatter={(label: string) => {
-              const date = new Date(label);
-              return date.toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              });
-            }}
-            formatter={(value: number | undefined) => [
-              formatValue(value ?? 0),
-              "Value",
-            ]}
-          />
-          <Area
-            type="monotone"
-            dataKey="value"
-            stroke={color}
-            strokeWidth={2}
-            fill={`url(#${gradientId})`}
-            dot={false}
-            activeDot={{
-              r: 5,
-              fill: "var(--bg-primary, #1f2937)",
-              stroke: color,
-              strokeWidth: 2,
-            }}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
+    <div className={className}>
+      <ReactECharts
+        option={option}
+        style={{ height, width: "100%" }}
+        opts={{ renderer: "svg" }}
+      />
     </div>
   );
 }

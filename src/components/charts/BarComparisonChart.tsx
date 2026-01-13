@@ -1,15 +1,7 @@
 "use client";
 
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  Cell,
-} from "recharts";
+import ReactECharts from "echarts-for-react";
+import type { EChartsOption } from "echarts";
 
 export interface BarComparisonDataItem {
   label: string;
@@ -43,72 +35,128 @@ export function BarComparisonChart({
   layout = "horizontal",
 }: BarComparisonChartProps) {
   const isVertical = layout === "vertical";
+  const labels = data.map((d) => d.label);
+  const values = data.map((d) => d.value);
+  const colors = data.map((d) => d.color || color);
+
+  const option: EChartsOption = {
+    tooltip: {
+      trigger: "axis",
+      backgroundColor: "var(--bg-primary)",
+      borderColor: "var(--text-secondary)",
+      textStyle: {
+        color: "var(--text-primary)",
+      },
+      axisPointer: {
+        type: "shadow",
+      },
+      formatter: (params: unknown) => {
+        const p = Array.isArray(params) ? params[0] : params;
+        const typedP = p as { name: string; value: number };
+        return `${typedP.name}: ${formatValue(typedP.value)}`;
+      },
+    },
+    grid: {
+      left: isVertical ? 90 : 50,
+      right: 20,
+      top: 10,
+      bottom: 30,
+      containLabel: false,
+    },
+    xAxis: isVertical
+      ? {
+          type: "value",
+          axisLabel: {
+            color: "var(--text-secondary)",
+            fontSize: 12,
+            formatter: (value: number) => formatValue(value),
+          },
+          axisLine: {
+            lineStyle: {
+              color: "var(--text-secondary)",
+              opacity: 0.3,
+            },
+          },
+          splitLine: {
+            lineStyle: {
+              color: "var(--text-secondary)",
+              opacity: 0.2,
+              type: "dashed",
+            },
+          },
+        }
+      : {
+          type: "category",
+          data: labels,
+          axisLabel: {
+            color: "var(--text-secondary)",
+            fontSize: 12,
+          },
+          axisLine: {
+            lineStyle: {
+              color: "var(--text-secondary)",
+              opacity: 0.3,
+            },
+          },
+        },
+    yAxis: isVertical
+      ? {
+          type: "category",
+          data: labels,
+          axisLabel: {
+            color: "var(--text-secondary)",
+            fontSize: 12,
+          },
+          axisLine: {
+            lineStyle: {
+              color: "var(--text-secondary)",
+              opacity: 0.3,
+            },
+          },
+        }
+      : {
+          type: "value",
+          axisLabel: {
+            color: "var(--text-secondary)",
+            fontSize: 12,
+            formatter: (value: number) => formatValue(value),
+          },
+          axisLine: {
+            lineStyle: {
+              color: "var(--text-secondary)",
+              opacity: 0.3,
+            },
+          },
+          splitLine: {
+            lineStyle: {
+              color: "var(--text-secondary)",
+              opacity: 0.2,
+              type: "dashed",
+            },
+          },
+        },
+    series: [
+      {
+        type: "bar",
+        data: values.map((value, index) => ({
+          value,
+          itemStyle: {
+            color: colors[index],
+            borderRadius: isVertical ? [0, 4, 4, 0] : [4, 4, 0, 0],
+          },
+        })),
+        barMaxWidth: 40,
+      },
+    ],
+  };
 
   return (
-    <div className={className} style={{ width: "100%", height }}>
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart
-          data={data}
-          layout={isVertical ? "vertical" : "horizontal"}
-          margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
-        >
-          <CartesianGrid
-            strokeDasharray="3 3"
-            stroke="var(--text-secondary)"
-            opacity={0.2}
-          />
-          {isVertical ? (
-            <>
-              <XAxis
-                type="number"
-                tickFormatter={formatValue}
-                tick={{ fill: "var(--text-secondary)", fontSize: 12 }}
-                axisLine={{ stroke: "var(--text-secondary)", opacity: 0.3 }}
-                tickLine={{ stroke: "var(--text-secondary)", opacity: 0.3 }}
-              />
-              <YAxis
-                type="category"
-                dataKey="label"
-                tick={{ fill: "var(--text-secondary)", fontSize: 12 }}
-                axisLine={{ stroke: "var(--text-secondary)", opacity: 0.3 }}
-                tickLine={{ stroke: "var(--text-secondary)", opacity: 0.3 }}
-                width={80}
-              />
-            </>
-          ) : (
-            <>
-              <XAxis
-                dataKey="label"
-                tick={{ fill: "var(--text-secondary)", fontSize: 12 }}
-                axisLine={{ stroke: "var(--text-secondary)", opacity: 0.3 }}
-                tickLine={{ stroke: "var(--text-secondary)", opacity: 0.3 }}
-              />
-              <YAxis
-                tickFormatter={formatValue}
-                tick={{ fill: "var(--text-secondary)", fontSize: 12 }}
-                axisLine={{ stroke: "var(--text-secondary)", opacity: 0.3 }}
-                tickLine={{ stroke: "var(--text-secondary)", opacity: 0.3 }}
-              />
-            </>
-          )}
-          <Tooltip
-            contentStyle={{
-              backgroundColor: "var(--bg-primary)",
-              border: "1px solid var(--text-secondary)",
-              borderRadius: "8px",
-              color: "var(--text-primary)",
-            }}
-            labelStyle={{ color: "var(--text-primary)" }}
-            formatter={(value: number | undefined) => [formatValue(value ?? 0), "Value"]}
-            cursor={{ fill: "var(--text-secondary)", opacity: 0.1 }}
-          />
-          <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={entry.color || color} />
-            ))}
-          </Bar>
-        </BarChart>
-      </ResponsiveContainer>
+    <div className={className}>
+      <ReactECharts
+        option={option}
+        style={{ height, width: "100%" }}
+        opts={{ renderer: "svg" }}
+      />
     </div>
   );
 }

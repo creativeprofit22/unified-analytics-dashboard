@@ -3,7 +3,8 @@
 import type { UnifiedAnalyticsData } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
-import { StatCard, SectionHeader, createMetric } from "../shared";
+import { PieDistributionChart, type PieDataItem } from "@/components/charts/PieDistributionChart";
+import { SectionHeader, createMetric } from "../shared";
 
 interface TrafficSectionProps {
   data: UnifiedAnalyticsData["traffic"];
@@ -64,15 +65,14 @@ export function TrafficSection({ data }: TrafficSectionProps) {
       {data.trafficBySource && Object.keys(data.trafficBySource).length > 0 && (
         <div className="mt-4">
           <SectionHeader>Traffic by Source</SectionHeader>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
-            {Object.entries(data.trafficBySource).map(([source, count]) => (
-              <StatCard
-                key={source}
-                label={source}
-                value={count ?? 0}
-              />
-            ))}
-          </div>
+          <PieDistributionChart
+            data={Object.entries(data.trafficBySource).map(([source, count]): PieDataItem => ({
+              name: source,
+              value: count ?? 0,
+            }))}
+            height={280}
+            innerRadius={50}
+          />
         </div>
       )}
     </CategorySection>

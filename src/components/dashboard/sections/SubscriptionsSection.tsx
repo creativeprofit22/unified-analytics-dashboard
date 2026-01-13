@@ -3,8 +3,8 @@
 import type { UnifiedAnalyticsData } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
-import { StatCard, SectionHeader, createMetric } from "../shared";
-import { cn } from "@/utils/cn";
+import { BarComparisonChart, type BarComparisonDataItem } from "@/components/charts/BarComparisonChart";
+import { SectionHeader, createMetric } from "../shared";
 
 interface SubscriptionsSectionProps {
   data: UnifiedAnalyticsData["subscriptions"];
@@ -21,17 +21,12 @@ function MetricGrid({ children }: { children: React.ReactNode }) {
 export function SubscriptionsSection({ data }: SubscriptionsSectionProps) {
   if (!data) return null;
 
-  const mrrItems = data.mrrMovement
+  const mrrChartData: BarComparisonDataItem[] = data.mrrMovement
     ? [
-        { label: "New", value: data.mrrMovement.new, color: "text-green-400" },
-        { label: "Expansion", value: data.mrrMovement.expansion, color: "text-blue-400" },
-        { label: "Contraction", value: data.mrrMovement.contraction, color: "text-yellow-400" },
-        { label: "Churned", value: data.mrrMovement.churned, color: "text-red-400" },
-        {
-          label: "Net",
-          value: data.mrrMovement.net,
-          color: data.mrrMovement.net >= 0 ? "text-green-400" : "text-red-400",
-        },
+        { label: "New", value: data.mrrMovement.new, color: "#22c55e" },
+        { label: "Expansion", value: data.mrrMovement.expansion, color: "#3b82f6" },
+        { label: "Contraction", value: Math.abs(data.mrrMovement.contraction), color: "#f59e0b" },
+        { label: "Churned", value: Math.abs(data.mrrMovement.churned), color: "#ef4444" },
       ]
     : [];
 
@@ -86,17 +81,15 @@ export function SubscriptionsSection({ data }: SubscriptionsSectionProps) {
       {data.mrrMovement && (
         <div className="mt-4">
           <SectionHeader>MRR Movement</SectionHeader>
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-            {mrrItems.map((item) => (
-              <StatCard
-                key={item.label}
-                label={item.label}
-                value={Math.abs(item.value)}
-                color={item.color}
-                prefix="$"
-              />
-            ))}
-          </div>
+          <BarComparisonChart
+            data={mrrChartData}
+            height={200}
+          />
+          <p className="mt-2 text-sm text-[var(--text-secondary)]">
+            Net: <span className={data.mrrMovement.net >= 0 ? "text-green-400" : "text-red-400"}>
+              ${Math.abs(data.mrrMovement.net).toLocaleString()}
+            </span>
+          </p>
         </div>
       )}
     </CategorySection>
