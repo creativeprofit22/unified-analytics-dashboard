@@ -3,7 +3,7 @@
 import type { UnifiedAnalyticsData, SubscriptionMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
-import { BarComparisonChart, type BarComparisonDataItem } from "@/components/charts/BarComparisonChart";
+import { BarComparisonChart, HeatmapChart, type BarComparisonDataItem, type HeatmapDataItem } from "@/components/charts";
 import { SectionHeader, createMetric } from "../shared";
 
 interface SubscriptionsSectionProps {
@@ -104,6 +104,30 @@ export function SubscriptionsSection({ data, comparisonData }: SubscriptionsSect
               ${Math.abs(data.mrrMovement.net).toLocaleString()}
             </span>
           </p>
+        </div>
+      )}
+
+      {data.retentionByCohort && data.retentionByCohort.length > 0 && (
+        <div className="mt-4">
+          <SectionHeader>Cohort Retention</SectionHeader>
+          <HeatmapChart
+            data={data.retentionByCohort.flatMap((cohort, yIndex) =>
+              cohort.months.map((value, xIndex): HeatmapDataItem => ({
+                x: xIndex,
+                y: yIndex,
+                value,
+              }))
+            )}
+            xLabels={Array.from(
+              { length: Math.max(...data.retentionByCohort.map(c => c.months.length)) },
+              (_, i) => `M${i}`
+            )}
+            yLabels={data.retentionByCohort.map(c => c.cohort)}
+            height={Math.max(200, data.retentionByCohort.length * 30 + 80)}
+            colorRange={["#ef4444", "#22c55e"]}
+            valueFormatter={(v) => `${v.toFixed(0)}%`}
+            showValues={data.retentionByCohort.length <= 8}
+          />
         </div>
       )}
     </CategorySection>

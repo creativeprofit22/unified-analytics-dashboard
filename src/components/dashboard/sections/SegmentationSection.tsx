@@ -2,6 +2,7 @@
 
 import type { UnifiedAnalyticsData } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
+import { SankeyChart, RadarChart, type SankeyNode, type SankeyLink, type RadarIndicator, type RadarSeriesData } from "@/components/charts";
 import { StatCard, DataTable, SectionHeader, type Column } from "../shared";
 
 interface SegmentationSectionProps {
@@ -103,6 +104,65 @@ export function SegmentationSection({ data, comparisonData }: SegmentationSectio
               <StatCard key={stage} label={stage} value={count} />
             ))}
           </div>
+        </div>
+      )}
+
+      {data.byLifecycle && (
+        <div className="mt-4">
+          <SectionHeader>Lifecycle Flow</SectionHeader>
+          <SankeyChart
+            nodes={(() => {
+              const stages = Object.keys(data.byLifecycle);
+              return stages.map((stage): SankeyNode => ({
+                name: stage.charAt(0).toUpperCase() + stage.slice(1),
+                color: stage === "churned" ? "#ef4444" : stage === "customer" ? "#22c55e" : undefined,
+              }));
+            })()}
+            links={(() => {
+              const lifecycle = data.byLifecycle;
+              const links: SankeyLink[] = [];
+
+              // Define typical lifecycle flow
+              if (lifecycle.visitor && lifecycle.lead) {
+                links.push({ source: "Visitor", target: "Lead", value: Math.min(lifecycle.visitor * 0.3, lifecycle.lead) });
+              }
+              if (lifecycle.lead && lifecycle.trial) {
+                links.push({ source: "Lead", target: "Trial", value: Math.min(lifecycle.lead * 0.4, lifecycle.trial) });
+              }
+              if (lifecycle.trial && lifecycle.customer) {
+                links.push({ source: "Trial", target: "Customer", value: Math.min(lifecycle.trial * 0.5, lifecycle.customer) });
+              }
+              if (lifecycle.customer && lifecycle.churned) {
+                links.push({ source: "Customer", target: "Churned", value: lifecycle.churned });
+              }
+              if (lifecycle.reactivated && lifecycle.customer) {
+                links.push({ source: "Churned", target: "Reactivated", value: lifecycle.reactivated });
+                links.push({ source: "Reactivated", target: "Customer", value: lifecycle.reactivated * 0.8 });
+              }
+
+              return links.filter(l => l.value > 0);
+            })()}
+            height={300}
+          />
+        </div>
+      )}
+
+      {data.byBehavior && data.byBehavior.length >= 2 && (
+        <div className="mt-4">
+          <SectionHeader>Segment Comparison</SectionHeader>
+          <RadarChart
+            indicators={[
+              { name: "Users", max: Math.max(...data.byBehavior.map(s => s.users)) },
+              { name: "Revenue", max: Math.max(...data.byBehavior.map(s => s.avgRevenue)) },
+              { name: "Share %", max: 100 },
+            ]}
+            series={data.byBehavior.slice(0, 3).map((segment): RadarSeriesData => ({
+              name: segment.segment.replace("_", " "),
+              values: [segment.users, segment.avgRevenue, segment.percentage],
+            }))}
+            height={280}
+            showLegend={true}
+          />
         </div>
       )}
     </CategorySection>

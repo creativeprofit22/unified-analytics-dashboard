@@ -3,7 +3,14 @@
 import type { UnifiedAnalyticsData, UnitEconomicsMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
-import { createMetric } from "../shared";
+import { GaugeChart, type GaugeThreshold } from "@/components/charts";
+import { SectionHeader, createMetric } from "../shared";
+
+const ltvCacThresholds: GaugeThreshold[] = [
+  { value: 1, color: "#ef4444", label: "Unsustainable" },
+  { value: 3, color: "#eab308", label: "Acceptable" },
+  { value: 5, color: "#22c55e", label: "Healthy" },
+];
 
 interface UnitEconomicsSectionProps {
   data: UnifiedAnalyticsData["unitEconomics"];
@@ -81,6 +88,37 @@ export function UnitEconomicsSection({ data, comparisonData }: UnitEconomicsSect
           format="percent"
         />
       </MetricGrid>
+
+      <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div>
+          <SectionHeader>LTV:CAC Health</SectionHeader>
+          <GaugeChart
+            value={data.ltvCacRatio}
+            min={0}
+            max={5}
+            title="LTV:CAC Ratio"
+            unit="x"
+            thresholds={ltvCacThresholds}
+            height={200}
+          />
+        </div>
+        <div>
+          <SectionHeader>Net Revenue Retention</SectionHeader>
+          <GaugeChart
+            value={data.nrr}
+            min={80}
+            max={140}
+            title="NRR"
+            unit="%"
+            thresholds={[
+              { value: 100, color: "#ef4444", label: "Contracting" },
+              { value: 110, color: "#eab308", label: "Stable" },
+              { value: 140, color: "#22c55e", label: "Growing" },
+            ]}
+            height={200}
+          />
+        </div>
+      </div>
     </CategorySection>
   );
 }

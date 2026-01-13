@@ -3,6 +3,7 @@
 import type { UnifiedAnalyticsData, CampaignMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
+import { ScatterChart, type ScatterDataItem } from "@/components/charts";
 import { DataTable, SectionHeader, createMetric, type Column } from "../shared";
 
 interface CampaignsSectionProps {
@@ -179,6 +180,29 @@ export function CampaignsSection({ data, comparisonData }: CampaignsSectionProps
             columns={campaignColumns}
             keyField="id"
             limit={5}
+          />
+        </div>
+      )}
+
+      {data.byCampaign && data.byCampaign.length >= 3 && (
+        <div className="mt-4">
+          <SectionHeader>Campaign Performance Analysis</SectionHeader>
+          <p className="text-xs text-[var(--text-secondary)] mb-2">
+            Click-through rate vs Revenue (bubble size = sent volume)
+          </p>
+          <ScatterChart
+            data={data.byCampaign.map((campaign): ScatterDataItem => ({
+              x: campaign.sent > 0 ? (campaign.clicks / campaign.sent) * 100 : 0,
+              y: campaign.revenue,
+              label: campaign.name,
+              value: campaign.sent,
+            }))}
+            height={280}
+            xAxisLabel="CTR (%)"
+            yAxisLabel="Revenue ($)"
+            symbolSize={(value) => Math.max(8, Math.min(30, Math.sqrt(value[2] || 0) / 10))}
+            showTrendLine={true}
+            enableBrush={true}
           />
         </div>
       )}
