@@ -3,7 +3,7 @@
 import type { UnifiedAnalyticsData } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
-import { TrendChart } from "@/components/TrendChart";
+import { AreaTrendChart } from "@/components/charts";
 import { SectionHeader, createMetric } from "../shared";
 
 interface RevenueSectionProps {
@@ -62,7 +62,7 @@ export function RevenueSection({ data }: RevenueSectionProps) {
       {data.revenueTrend && data.revenueTrend.length > 0 && (
         <div className="mt-4">
           <SectionHeader>Revenue Trend</SectionHeader>
-          <TrendChart
+          <AreaTrendChart
             data={data.revenueTrend.map((d) => ({ date: d.date, value: d.gross }))}
             height={150}
             color="#22c55e"
