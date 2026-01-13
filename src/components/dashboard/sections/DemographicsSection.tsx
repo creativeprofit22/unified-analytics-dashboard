@@ -3,6 +3,7 @@
 import type { UnifiedAnalyticsData } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { BarComparisonChart, type BarComparisonDataItem } from "@/components/charts/BarComparisonChart";
+import { PieDistributionChart, type PieDataItem } from "@/components/charts/PieDistributionChart";
 import { StatCard, SectionHeader } from "../shared";
 
 interface DemographicsSectionProps {
@@ -53,21 +54,45 @@ export function DemographicsSection({ data, comparisonData }: DemographicsSectio
               </div>
             ))}
           </div>
+          <div className="mt-4">
+            <BarComparisonChart
+              data={data.geographic.byCountry
+                .slice(0, 5)
+                .map((country): BarComparisonDataItem => ({
+                  label: country.country,
+                  value: country.users,
+                }))}
+              height={200}
+              layout="vertical"
+            />
+          </div>
         </div>
       )}
 
-      {data.device?.byType && (
+      {data.device?.byType && Object.keys(data.device.byType).length > 0 && (
         <div className="mt-4">
           <SectionHeader>Device Types</SectionHeader>
-          <div className="grid grid-cols-3 gap-3">
-            {Object.entries(data.device.byType).map(([type, count]) => (
-              <StatCard
-                key={type}
-                label={type}
-                value={count}
-                icon={deviceIcons[type] || "\uD83D\uDCDF"}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-3">
+              {Object.entries(data.device.byType).map(([type, count]) => (
+                <StatCard
+                  key={type}
+                  label={type}
+                  value={count}
+                  icon={deviceIcons[type] || "\uD83D\uDCDF"}
+                />
+              ))}
+            </div>
+            <div>
+              <PieDistributionChart
+                data={Object.entries(data.device.byType).map(([type, count]): PieDataItem => ({
+                  name: type.charAt(0).toUpperCase() + type.slice(1),
+                  value: count,
+                }))}
+                height={250}
+                innerRadius={50}
               />
-            ))}
+            </div>
           </div>
         </div>
       )}

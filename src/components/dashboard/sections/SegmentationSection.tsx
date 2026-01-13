@@ -135,9 +135,9 @@ export function SegmentationSection({ data, comparisonData }: SegmentationSectio
               if (lifecycle.customer && lifecycle.churned) {
                 links.push({ source: "Customer", target: "Churned", value: lifecycle.churned });
               }
-              if (lifecycle.reactivated && lifecycle.customer) {
+              // Reactivated flows from Churned (no cycle back to Customer - Sankey requires DAG)
+              if (lifecycle.churned && lifecycle.reactivated) {
                 links.push({ source: "Churned", target: "Reactivated", value: lifecycle.reactivated });
-                links.push({ source: "Reactivated", target: "Customer", value: lifecycle.reactivated * 0.8 });
               }
 
               return links.filter(l => l.value > 0);

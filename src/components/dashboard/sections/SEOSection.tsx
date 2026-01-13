@@ -4,6 +4,8 @@ import type { UnifiedAnalyticsData, SEOMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
 import { DataTable, SectionHeader, createMetric, type Column } from "../shared";
+import { ScatterChart, type ScatterDataItem } from "@/components/charts/ScatterChart";
+import { BarComparisonChart, type BarComparisonDataItem } from "@/components/charts/BarComparisonChart";
 
 interface SEOSectionProps {
   data: UnifiedAnalyticsData["seo"];
@@ -114,6 +116,41 @@ export function SEOSection({ data, comparisonData }: SEOSectionProps) {
           format="number"
         />
       </MetricGrid>
+
+      {data.topQueries && data.topQueries.length > 0 && (
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            <SectionHeader>Position vs CTR Correlation</SectionHeader>
+            <ScatterChart
+              data={data.topQueries.map((q): ScatterDataItem => ({
+                x: q.position,
+                y: q.ctr,
+                label: q.query,
+                value: q.clicks,
+              }))}
+              xAxisLabel="Position"
+              yAxisLabel="CTR %"
+              showTrendLine={true}
+              height={280}
+            />
+          </div>
+          <div>
+            <SectionHeader>Top Queries by Clicks</SectionHeader>
+            <BarComparisonChart
+              data={data.topQueries
+                .slice()
+                .sort((a, b) => b.clicks - a.clicks)
+                .slice(0, 5)
+                .map((q): BarComparisonDataItem => ({
+                  label: q.query.length > 20 ? q.query.substring(0, 20) + "..." : q.query,
+                  value: q.clicks,
+                }))}
+              layout="vertical"
+              height={280}
+            />
+          </div>
+        </div>
+      )}
 
       {data.topQueries && data.topQueries.length > 0 && (
         <div className="mt-4">

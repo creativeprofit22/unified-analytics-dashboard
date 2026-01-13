@@ -3,7 +3,10 @@
 import type { UnifiedAnalyticsData, PaymentMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
-import { createMetric } from "../shared";
+import { createMetric, SectionHeader } from "../shared";
+import { FunnelChart } from "@/components/charts/FunnelChart";
+import { PieDistributionChart } from "@/components/charts/PieDistributionChart";
+import { GaugeChart } from "@/components/charts/GaugeChart";
 
 interface PaymentsSectionProps {
   data: UnifiedAnalyticsData["payments"];
@@ -81,6 +84,55 @@ export function PaymentsSection({ data, comparisonData }: PaymentsSectionProps) 
           format="percent"
         />
       </MetricGrid>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        {/* Recovery Funnel Chart */}
+        {data.recoveryByAttempt && (
+          <div className="bg-[var(--bg-secondary)] rounded-lg p-4">
+            <SectionHeader>Recovery by Attempt</SectionHeader>
+            <FunnelChart
+              data={[
+                { name: "Attempt 1", value: data.recoveryByAttempt.attempt1 },
+                { name: "Attempt 2", value: data.recoveryByAttempt.attempt2 },
+                { name: "Attempt 3", value: data.recoveryByAttempt.attempt3 },
+                { name: "Attempt 4", value: data.recoveryByAttempt.attempt4 },
+              ]}
+              height={250}
+            />
+          </div>
+        )}
+
+        {/* Failure Reasons Pie Chart */}
+        {data.failureByReason && Object.keys(data.failureByReason).length > 0 && (
+          <div className="bg-[var(--bg-secondary)] rounded-lg p-4">
+            <SectionHeader>Failure by Reason</SectionHeader>
+            <PieDistributionChart
+              data={Object.entries(data.failureByReason).map(([name, value]) => ({
+                name,
+                value,
+              }))}
+              height={250}
+              innerRadius={40}
+            />
+          </div>
+        )}
+
+        {/* Recovery Rate Gauge */}
+        {typeof data.recoveryRate === "number" && (
+          <div className="bg-[var(--bg-secondary)] rounded-lg p-4">
+            <SectionHeader>Recovery Rate</SectionHeader>
+            <GaugeChart
+              value={data.recoveryRate}
+              min={0}
+              max={100}
+              title="Recovery Rate"
+              unit="%"
+              height={250}
+            />
+          </div>
+        )}
+      </div>
     </CategorySection>
   );
 }

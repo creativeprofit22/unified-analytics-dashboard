@@ -4,6 +4,7 @@ import type { UnifiedAnalyticsData, TrafficMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
 import { PieDistributionChart, type PieDataItem } from "@/components/charts/PieDistributionChart";
+import { BarComparisonChart, type BarComparisonDataItem } from "@/components/charts/BarComparisonChart";
 import { SectionHeader, createMetric } from "../shared";
 
 interface TrafficSectionProps {
@@ -101,6 +102,23 @@ export function TrafficSection({ data, comparisonData }: TrafficSectionProps) {
             }))}
             height={280}
             innerRadius={50}
+          />
+        </div>
+      )}
+
+      {data.trafficByMedium && Object.keys(data.trafficByMedium).length > 0 && (
+        <div className="mt-4">
+          <SectionHeader>Traffic by Medium</SectionHeader>
+          <BarComparisonChart
+            data={Object.entries(data.trafficByMedium)
+              .sort(([, a], [, b]) => b - a)
+              .slice(0, 5)
+              .map(([medium, count]): BarComparisonDataItem => ({
+                label: medium,
+                value: count,
+              }))}
+            height={250}
+            layout="vertical"
           />
         </div>
       )}
