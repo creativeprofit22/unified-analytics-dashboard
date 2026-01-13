@@ -1,9 +1,13 @@
 "use client";
 
+import { useMemo } from "react";
 import type { UnifiedAnalyticsData } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { SankeyChart, RadarChart, type SankeyNode, type SankeyLink, type RadarIndicator, type RadarSeriesData } from "@/components/charts";
 import { StatCard, DataTable, SectionHeader, type Column } from "../shared";
+import { useSectionFilters } from "@/contexts/SectionFilterContext";
+import { SectionFilterBar } from "@/components/SectionFilterBar";
+import { getSegmentationFilters, SECTION_IDS } from "@/config/sectionFilters";
 
 interface SegmentationSectionProps {
   data: UnifiedAnalyticsData["segmentation"];
@@ -68,16 +72,48 @@ function findLifecycleComparison(
 export function SegmentationSection({ data, comparisonData }: SegmentationSectionProps) {
   if (!data) return null;
 
+  const filterFields = useMemo(() => getSegmentationFilters(data), [data]);
+
+  const {
+    filters,
+    fields,
+    setFilter,
+    toggleFilter,
+    clearFilters,
+    clearFilter,
+    hasActiveFilters,
+    activeFilterCount,
+  } = useSectionFilters(SECTION_IDS.SEGMENTATION, filterFields);
+
+  // Filter by behavior segment
+  const filteredByBehavior = useMemo(() => {
+    if (!data?.byBehavior) return [];
+    const behaviorFilter = Array.isArray(filters.behavior) ? filters.behavior : [];
+    if (behaviorFilter.length === 0) return data.byBehavior;
+    return data.byBehavior.filter(b => behaviorFilter.includes(b.segment));
+  }, [data?.byBehavior, filters.behavior]);
+
   return (
     <CategorySection
       title="Segmentation"
       description="User segments and behavioral analysis"
     >
-      {data.byBehavior && data.byBehavior.length > 0 && (
+      <SectionFilterBar
+        sectionId={SECTION_IDS.SEGMENTATION}
+        fields={fields}
+        filters={filters}
+        onFilterChange={setFilter}
+        onToggle={toggleFilter}
+        onClear={clearFilters}
+        onClearFilter={clearFilter}
+        hasActiveFilters={hasActiveFilters}
+        activeFilterCount={activeFilterCount}
+      />
+      {filteredByBehavior && filteredByBehavior.length > 0 && (
         <div>
           <SectionHeader>Behavioral Segments</SectionHeader>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-            {data.byBehavior.map((segment) => (
+            {filteredByBehavior.map((segment) => (
               <StatCard
                 key={segment.segment}
                 label={segment.segment.replace("_", " ")}
@@ -147,16 +183,16 @@ export function SegmentationSection({ data, comparisonData }: SegmentationSectio
         </div>
       )}
 
-      {data.byBehavior && data.byBehavior.length >= 2 && (
+      {filteredByBehavior && filteredByBehavior.length >= 2 && (
         <div className="mt-4">
           <SectionHeader>Segment Comparison</SectionHeader>
           <RadarChart
             indicators={[
-              { name: "Users", max: Math.max(...data.byBehavior.map(s => s.users)) },
-              { name: "Revenue", max: Math.max(...data.byBehavior.map(s => s.avgRevenue)) },
+              { name: "Users", max: Math.max(...filteredByBehavior.map(s => s.users)) },
+              { name: "Revenue", max: Math.max(...filteredByBehavior.map(s => s.avgRevenue)) },
               { name: "Share %", max: 100 },
             ]}
-            series={data.byBehavior.slice(0, 3).map((segment): RadarSeriesData => ({
+            series={filteredByBehavior.slice(0, 3).map((segment): RadarSeriesData => ({
               name: segment.segment.replace("_", " "),
               values: [segment.users, segment.avgRevenue, segment.percentage],
             }))}

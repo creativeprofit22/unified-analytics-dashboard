@@ -242,6 +242,13 @@ function getMockSEOData(): SEOMetrics {
       { query: "unified analytics", impressions: 45000, clicks: 2340, ctr: 5.2, position: 4.2 },
       { query: "dashboard software", impressions: 38000, clicks: 1876, ctr: 4.9, position: 6.1 },
       { query: "marketing metrics", impressions: 32000, clicks: 1543, ctr: 4.8, position: 8.3 },
+      { query: "analytics platform", impressions: 28000, clicks: 980, ctr: 3.5, position: 12.4 },
+      { query: "business intelligence", impressions: 22000, clicks: 660, ctr: 3.0, position: 18.7 },
+      { query: "data visualization", impressions: 19000, clicks: 570, ctr: 3.0, position: 22.1 },
+      { query: "kpi tracking", impressions: 15000, clicks: 600, ctr: 4.0, position: 9.5 },
+      { query: "real time reporting", impressions: 12000, clicks: 360, ctr: 3.0, position: 25.3 },
+      { query: "saas analytics", impressions: 9500, clicks: 475, ctr: 5.0, position: 7.8 },
+      { query: "conversion tracking", impressions: 8200, clicks: 328, ctr: 4.0, position: 15.2 },
     ],
     topPages: [
       { url: "/features", clicks: 3421, impressions: 78000, ctr: 4.4, position: 5.2 },

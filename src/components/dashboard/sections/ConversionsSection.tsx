@@ -1,10 +1,14 @@
 "use client";
 
+import { useMemo } from "react";
 import type { UnifiedAnalyticsData, ConversionMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
 import { FunnelChart, type FunnelDataItem } from "@/components/charts";
 import { SectionHeader, createMetric } from "../shared";
+import { useSectionFilters } from "@/contexts/SectionFilterContext";
+import { SectionFilterBar } from "@/components/SectionFilterBar";
+import { getConversionsFilters, SECTION_IDS } from "@/config/sectionFilters";
 
 interface ConversionsSectionProps {
   data: UnifiedAnalyticsData["conversions"];
@@ -35,11 +39,53 @@ function MetricGrid({ children }: { children: React.ReactNode }) {
 export function ConversionsSection({ data, comparisonData }: ConversionsSectionProps) {
   if (!data) return null;
 
+  const filterFields = useMemo(() => getConversionsFilters(data), [data]);
+
+  const {
+    filters,
+    fields,
+    setFilter,
+    toggleFilter,
+    clearFilters,
+    clearFilter,
+    hasActiveFilters,
+    activeFilterCount,
+  } = useSectionFilters(SECTION_IDS.CONVERSIONS, filterFields);
+
+  // Filter funnel steps
+  const filteredFunnel = useMemo(() => {
+    if (!data?.funnel) return [];
+    const stepFilter = Array.isArray(filters.funnelStep) ? filters.funnelStep : [];
+    if (stepFilter.length === 0) return data.funnel;
+    return data.funnel.filter(f => stepFilter.includes(f.step));
+  }, [data?.funnel, filters.funnelStep]);
+
+  // Filter conversions by source
+  const filteredConversionsBySource = useMemo(() => {
+    if (!data?.conversionsBySource) return {};
+    const sourceFilter = Array.isArray(filters.conversionSource) ? filters.conversionSource : [];
+    if (sourceFilter.length === 0) return data.conversionsBySource;
+    return Object.fromEntries(
+      Object.entries(data.conversionsBySource).filter(([source]) => sourceFilter.includes(source))
+    );
+  }, [data?.conversionsBySource, filters.conversionSource]);
+
   return (
     <CategorySection
       title="Conversions & Funnel"
       description="Conversion rates and funnel analysis"
     >
+      <SectionFilterBar
+        sectionId={SECTION_IDS.CONVERSIONS}
+        fields={fields}
+        filters={filters}
+        onFilterChange={setFilter}
+        onToggle={toggleFilter}
+        onClear={clearFilters}
+        onClearFilter={clearFilter}
+        hasActiveFilters={hasActiveFilters}
+        activeFilterCount={activeFilterCount}
+      />
       <MetricGrid>
         <MetricCard
           title="Conversion Rate"
@@ -74,11 +120,11 @@ export function ConversionsSection({ data, comparisonData }: ConversionsSectionP
         />
       </MetricGrid>
 
-      {data.funnel && data.funnel.length > 0 && (
+      {filteredFunnel && filteredFunnel.length > 0 && (
         <div className="mt-4">
           <SectionHeader>Conversion Funnel</SectionHeader>
           <FunnelChart
-            data={data.funnel.map((step): FunnelDataItem => ({
+            data={filteredFunnel.map((step): FunnelDataItem => ({
               name: step.step,
               value: step.users,
             }))}

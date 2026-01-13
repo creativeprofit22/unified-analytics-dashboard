@@ -1,11 +1,15 @@
 "use client";
 
+import { useMemo } from "react";
 import type { UnifiedAnalyticsData, SEOMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
 import { DataTable, SectionHeader, createMetric, type Column } from "../shared";
 import { ScatterChart, type ScatterDataItem } from "@/components/charts/ScatterChart";
 import { BarComparisonChart, type BarComparisonDataItem } from "@/components/charts/BarComparisonChart";
+import { useSectionFilters } from "@/contexts/SectionFilterContext";
+import { SectionFilterBar } from "@/components/SectionFilterBar";
+import { getSEOFilters, SECTION_IDS } from "@/config/sectionFilters";
 
 interface SEOSectionProps {
   data: UnifiedAnalyticsData["seo"];
@@ -72,8 +76,57 @@ const queryColumns: Column<QueryRow>[] = [
 export function SEOSection({ data, comparisonData }: SEOSectionProps) {
   if (!data) return null;
 
+  const filterFields = useMemo(() => getSEOFilters(data), [data]);
+
+  const {
+    filters,
+    fields,
+    setFilter,
+    toggleFilter,
+    clearFilters,
+    clearFilter,
+    hasActiveFilters,
+    activeFilterCount,
+  } = useSectionFilters(SECTION_IDS.SEO, filterFields);
+
+  const filteredQueries = useMemo(() => {
+    if (!data?.topQueries) return [];
+    let result = [...data.topQueries];
+
+    // Query search filter
+    const querySearch = typeof filters.query === "string" ? filters.query.toLowerCase() : "";
+    if (querySearch) {
+      result = result.filter(q => q.query.toLowerCase().includes(querySearch));
+    }
+
+    // Position range filter
+    const posRange = filters.positionRange;
+    if (posRange && typeof posRange === "object" && "min" in posRange) {
+      result = result.filter(q => q.position >= posRange.min && q.position <= posRange.max);
+    }
+
+    // CTR threshold filter
+    const ctrRange = filters.ctrThreshold;
+    if (ctrRange && typeof ctrRange === "object" && "min" in ctrRange) {
+      result = result.filter(q => q.ctr >= ctrRange.min);
+    }
+
+    return result;
+  }, [data?.topQueries, filters]);
+
   return (
     <CategorySection title="SEO" description="Search engine optimization metrics">
+      <SectionFilterBar
+        sectionId={SECTION_IDS.SEO}
+        fields={fields}
+        filters={filters}
+        onFilterChange={setFilter}
+        onToggle={toggleFilter}
+        onClear={clearFilters}
+        onClearFilter={clearFilter}
+        hasActiveFilters={hasActiveFilters}
+        activeFilterCount={activeFilterCount}
+      />
       <MetricGrid>
         <MetricCard
           title="Visibility Score"
@@ -122,7 +175,7 @@ export function SEOSection({ data, comparisonData }: SEOSectionProps) {
           <div>
             <SectionHeader>Position vs CTR Correlation</SectionHeader>
             <ScatterChart
-              data={data.topQueries.map((q): ScatterDataItem => ({
+              data={filteredQueries.map((q): ScatterDataItem => ({
                 x: q.position,
                 y: q.ctr,
                 label: q.query,
@@ -137,7 +190,7 @@ export function SEOSection({ data, comparisonData }: SEOSectionProps) {
           <div>
             <SectionHeader>Top Queries by Clicks</SectionHeader>
             <BarComparisonChart
-              data={data.topQueries
+              data={filteredQueries
                 .slice()
                 .sort((a, b) => b.clicks - a.clicks)
                 .slice(0, 5)
@@ -156,7 +209,7 @@ export function SEOSection({ data, comparisonData }: SEOSectionProps) {
         <div className="mt-4">
           <SectionHeader>Top Search Queries</SectionHeader>
           <DataTable
-            data={data.topQueries}
+            data={filteredQueries}
             columns={queryColumns}
             keyField="query"
             limit={5}

@@ -1,10 +1,14 @@
 "use client";
 
+import { useMemo } from "react";
 import type { UnifiedAnalyticsData, RevenueMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
 import { AreaTrendChart } from "@/components/charts";
 import { SectionHeader, createMetric } from "../shared";
+import { useSectionFilters } from "@/contexts/SectionFilterContext";
+import { SectionFilterBar } from "@/components/SectionFilterBar";
+import { getRevenueFilters, SECTION_IDS } from "@/config/sectionFilters";
 
 interface RevenueSectionProps {
   data: UnifiedAnalyticsData["revenue"];
@@ -35,11 +39,63 @@ function MetricGrid({ children }: { children: React.ReactNode }) {
 export function RevenueSection({ data, comparisonData }: RevenueSectionProps) {
   if (!data) return null;
 
+  const filterFields = useMemo(() => getRevenueFilters(data), [data]);
+
+  const {
+    filters,
+    fields,
+    setFilter,
+    toggleFilter,
+    clearFilters,
+    clearFilter,
+    hasActiveFilters,
+    activeFilterCount,
+  } = useSectionFilters(SECTION_IDS.REVENUE, filterFields);
+
+  // Filter revenue by product
+  const filteredRevenueByProduct = useMemo(() => {
+    if (!data?.revenueByProduct) return [];
+    const productFilter = Array.isArray(filters.product) ? filters.product : [];
+    if (productFilter.length === 0) return data.revenueByProduct;
+    return data.revenueByProduct.filter(p => productFilter.includes(p.productName));
+  }, [data?.revenueByProduct, filters.product]);
+
+  // Filter revenue by category
+  const filteredRevenueByCategory = useMemo(() => {
+    if (!data?.revenueByCategory) return {};
+    const categoryFilter = Array.isArray(filters.category) ? filters.category : [];
+    if (categoryFilter.length === 0) return data.revenueByCategory;
+    return Object.fromEntries(
+      Object.entries(data.revenueByCategory).filter(([cat]) => categoryFilter.includes(cat))
+    );
+  }, [data?.revenueByCategory, filters.category]);
+
+  // Filter revenue by channel
+  const filteredRevenueByChannel = useMemo(() => {
+    if (!data?.revenueByChannel) return {};
+    const channelFilter = Array.isArray(filters.channel) ? filters.channel : [];
+    if (channelFilter.length === 0) return data.revenueByChannel;
+    return Object.fromEntries(
+      Object.entries(data.revenueByChannel).filter(([ch]) => channelFilter.includes(ch))
+    );
+  }, [data?.revenueByChannel, filters.channel]);
+
   return (
     <CategorySection
       title="Revenue & Orders"
       description="Revenue metrics from Stripe"
     >
+      <SectionFilterBar
+        sectionId={SECTION_IDS.REVENUE}
+        fields={fields}
+        filters={filters}
+        onFilterChange={setFilter}
+        onToggle={toggleFilter}
+        onClear={clearFilters}
+        onClearFilter={clearFilter}
+        hasActiveFilters={hasActiveFilters}
+        activeFilterCount={activeFilterCount}
+      />
       <MetricGrid>
         <MetricCard
           title="Gross Revenue"

@@ -1,10 +1,14 @@
 "use client";
 
+import { useMemo } from "react";
 import type { UnifiedAnalyticsData, CampaignMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
 import { ScatterChart, type ScatterDataItem } from "@/components/charts";
 import { DataTable, SectionHeader, createMetric, type Column } from "../shared";
+import { useSectionFilters } from "@/contexts/SectionFilterContext";
+import { SectionFilterBar } from "@/components/SectionFilterBar";
+import { getCampaignsFilters, SECTION_IDS } from "@/config/sectionFilters";
 
 interface CampaignsSectionProps {
   data: UnifiedAnalyticsData["campaigns"];
@@ -80,11 +84,70 @@ const campaignColumns: Column<CampaignRow>[] = [
 export function CampaignsSection({ data, comparisonData }: CampaignsSectionProps) {
   if (!data) return null;
 
+  const filterFields = useMemo(() => getCampaignsFilters(data), [data]);
+
+  const {
+    filters,
+    fields,
+    setFilter,
+    toggleFilter,
+    clearFilters,
+    clearFilter,
+    hasActiveFilters,
+    activeFilterCount,
+  } = useSectionFilters(SECTION_IDS.CAMPAIGNS, filterFields);
+
+  // Filter by channel
+  const filteredByChannel = useMemo(() => {
+    if (!data?.byChannel) return {};
+    const channelFilter = Array.isArray(filters.channel) ? filters.channel : [];
+    if (channelFilter.length === 0) return data.byChannel;
+    return Object.fromEntries(
+      Object.entries(data.byChannel).filter(([ch]) => channelFilter.includes(ch))
+    );
+  }, [data?.byChannel, filters.channel]);
+
+  // Filter campaigns
+  const filteredCampaigns = useMemo(() => {
+    if (!data?.byCampaign) return [];
+    let result = [...data.byCampaign];
+
+    // Channel filter
+    const channelFilter = Array.isArray(filters.channel) ? filters.channel : [];
+    if (channelFilter.length > 0) {
+      result = result.filter(c => channelFilter.includes(c.channel));
+    }
+
+    // Campaign name filter
+    if (typeof filters.campaign === "string" && filters.campaign) {
+      result = result.filter(c => c.name === filters.campaign);
+    }
+
+    // Search filter
+    const searchQuery = typeof filters.campaignSearch === "string" ? filters.campaignSearch.toLowerCase() : "";
+    if (searchQuery) {
+      result = result.filter(c => c.name.toLowerCase().includes(searchQuery));
+    }
+
+    return result;
+  }, [data?.byCampaign, filters]);
+
   return (
     <CategorySection
       title="Campaigns"
       description="Email, SMS, and WhatsApp campaign metrics"
     >
+      <SectionFilterBar
+        sectionId={SECTION_IDS.CAMPAIGNS}
+        fields={fields}
+        filters={filters}
+        onFilterChange={setFilter}
+        onToggle={toggleFilter}
+        onClear={clearFilters}
+        onClearFilter={clearFilter}
+        hasActiveFilters={hasActiveFilters}
+        activeFilterCount={activeFilterCount}
+      />
       <MetricGrid>
         <MetricCard
           title="Sent"
@@ -128,11 +191,11 @@ export function CampaignsSection({ data, comparisonData }: CampaignsSectionProps
         />
       </MetricGrid>
 
-      {data.byChannel && (
+      {filteredByChannel && Object.keys(filteredByChannel).length > 0 && (
         <div className="mt-4">
           <SectionHeader>By Channel</SectionHeader>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {Object.entries(data.byChannel).map(([channel, metrics]) => (
+            {Object.entries(filteredByChannel).map(([channel, metrics]) => (
               <div
                 key={channel}
                 className="p-4 rounded-lg bg-[var(--bg-secondary,rgba(255,255,255,0.03))]"
@@ -172,11 +235,11 @@ export function CampaignsSection({ data, comparisonData }: CampaignsSectionProps
         </div>
       )}
 
-      {data.byCampaign && data.byCampaign.length > 0 && (
+      {filteredCampaigns && filteredCampaigns.length > 0 && (
         <div className="mt-4">
           <SectionHeader>Recent Campaigns</SectionHeader>
           <DataTable
-            data={data.byCampaign}
+            data={filteredCampaigns}
             columns={campaignColumns}
             keyField="id"
             limit={5}
@@ -184,14 +247,14 @@ export function CampaignsSection({ data, comparisonData }: CampaignsSectionProps
         </div>
       )}
 
-      {data.byCampaign && data.byCampaign.length >= 3 && (
+      {filteredCampaigns && filteredCampaigns.length >= 3 && (
         <div className="mt-4">
           <SectionHeader>Campaign Performance Analysis</SectionHeader>
           <p className="text-xs text-[var(--text-secondary)] mb-2">
             Click-through rate vs Revenue (bubble size = sent volume)
           </p>
           <ScatterChart
-            data={data.byCampaign.map((campaign): ScatterDataItem => ({
+            data={filteredCampaigns.map((campaign): ScatterDataItem => ({
               x: campaign.sent > 0 ? (campaign.clicks / campaign.sent) * 100 : 0,
               y: campaign.revenue,
               label: campaign.name,

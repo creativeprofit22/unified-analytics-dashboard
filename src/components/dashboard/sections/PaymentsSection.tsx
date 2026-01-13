@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import type { UnifiedAnalyticsData, PaymentMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
@@ -7,6 +8,9 @@ import { createMetric, SectionHeader } from "../shared";
 import { FunnelChart } from "@/components/charts/FunnelChart";
 import { PieDistributionChart } from "@/components/charts/PieDistributionChart";
 import { GaugeChart } from "@/components/charts/GaugeChart";
+import { useSectionFilters } from "@/contexts/SectionFilterContext";
+import { SectionFilterBar } from "@/components/SectionFilterBar";
+import { getPaymentsFilters, SECTION_IDS } from "@/config/sectionFilters";
 
 interface PaymentsSectionProps {
   data: UnifiedAnalyticsData["payments"];
@@ -37,11 +41,35 @@ function MetricGrid({ children }: { children: React.ReactNode }) {
 export function PaymentsSection({ data, comparisonData }: PaymentsSectionProps) {
   if (!data) return null;
 
+  const filterFields = useMemo(() => getPaymentsFilters(data), [data]);
+
+  const {
+    filters,
+    fields,
+    setFilter,
+    toggleFilter,
+    clearFilters,
+    clearFilter,
+    hasActiveFilters,
+    activeFilterCount,
+  } = useSectionFilters(SECTION_IDS.PAYMENTS, filterFields);
+
   return (
     <CategorySection
       title="Payments"
       description="Payment processing and recovery metrics"
     >
+      <SectionFilterBar
+        sectionId={SECTION_IDS.PAYMENTS}
+        fields={fields}
+        filters={filters}
+        onFilterChange={setFilter}
+        onToggle={toggleFilter}
+        onClear={clearFilters}
+        onClearFilter={clearFilter}
+        hasActiveFilters={hasActiveFilters}
+        activeFilterCount={activeFilterCount}
+      />
       <MetricGrid>
         <MetricCard
           title="Successful Payments"

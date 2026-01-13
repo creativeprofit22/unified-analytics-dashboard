@@ -1,10 +1,14 @@
 "use client";
 
+import { useMemo } from "react";
 import type { UnifiedAnalyticsData, SubscriptionMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
 import { BarComparisonChart, HeatmapChart, type BarComparisonDataItem, type HeatmapDataItem } from "@/components/charts";
 import { SectionHeader, createMetric } from "../shared";
+import { useSectionFilters } from "@/contexts/SectionFilterContext";
+import { SectionFilterBar } from "@/components/SectionFilterBar";
+import { getSubscriptionsFilters, SECTION_IDS } from "@/config/sectionFilters";
 
 interface SubscriptionsSectionProps {
   data: UnifiedAnalyticsData["subscriptions"];
@@ -35,6 +39,29 @@ function MetricGrid({ children }: { children: React.ReactNode }) {
 export function SubscriptionsSection({ data, comparisonData }: SubscriptionsSectionProps) {
   if (!data) return null;
 
+  const filterFields = useMemo(() => getSubscriptionsFilters(data), [data]);
+
+  const {
+    filters,
+    fields,
+    setFilter,
+    toggleFilter,
+    clearFilters,
+    clearFilter,
+    hasActiveFilters,
+    activeFilterCount,
+  } = useSectionFilters(SECTION_IDS.SUBSCRIPTIONS, filterFields);
+
+  // Filter subscribers by plan
+  const filteredSubscribersByPlan = useMemo(() => {
+    if (!data?.subscribersByPlan) return {};
+    const planFilter = Array.isArray(filters.plan) ? filters.plan : [];
+    if (planFilter.length === 0) return data.subscribersByPlan;
+    return Object.fromEntries(
+      Object.entries(data.subscribersByPlan).filter(([plan]) => planFilter.includes(plan))
+    );
+  }, [data?.subscribersByPlan, filters.plan]);
+
   const mrrChartData: BarComparisonDataItem[] = data.mrrMovement
     ? [
         { label: "New", value: data.mrrMovement.new, color: "#22c55e" },
@@ -49,6 +76,17 @@ export function SubscriptionsSection({ data, comparisonData }: SubscriptionsSect
       title="Subscriptions & Retention"
       description="Subscriber metrics and retention rates"
     >
+      <SectionFilterBar
+        sectionId={SECTION_IDS.SUBSCRIPTIONS}
+        fields={fields}
+        filters={filters}
+        onFilterChange={setFilter}
+        onToggle={toggleFilter}
+        onClear={clearFilters}
+        onClearFilter={clearFilter}
+        hasActiveFilters={hasActiveFilters}
+        activeFilterCount={activeFilterCount}
+      />
       <MetricGrid>
         <MetricCard
           title="Active Subscribers"

@@ -1,11 +1,15 @@
 "use client";
 
+import { useMemo } from "react";
 import type { UnifiedAnalyticsData, TrafficMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
 import { PieDistributionChart, type PieDataItem } from "@/components/charts/PieDistributionChart";
 import { BarComparisonChart, type BarComparisonDataItem } from "@/components/charts/BarComparisonChart";
 import { SectionHeader, createMetric } from "../shared";
+import { useSectionFilters } from "@/contexts/SectionFilterContext";
+import { SectionFilterBar } from "@/components/SectionFilterBar";
+import { getTrafficFilters, SECTION_IDS } from "@/config/sectionFilters";
 
 interface TrafficSectionProps {
   data: UnifiedAnalyticsData["traffic"];
@@ -36,11 +40,55 @@ function MetricGrid({ children }: { children: React.ReactNode }) {
 export function TrafficSection({ data, comparisonData }: TrafficSectionProps) {
   if (!data) return null;
 
+  const filterFields = useMemo(() => getTrafficFilters(data), [data]);
+
+  const {
+    filters,
+    fields,
+    setFilter,
+    toggleFilter,
+    clearFilters,
+    clearFilter,
+    hasActiveFilters,
+    activeFilterCount,
+  } = useSectionFilters(SECTION_IDS.TRAFFIC, filterFields);
+
+  // Filter traffic by source
+  const filteredTrafficBySource = useMemo(() => {
+    if (!data?.trafficBySource) return {};
+    const sourceFilter = Array.isArray(filters.source) ? filters.source : [];
+    if (sourceFilter.length === 0) return data.trafficBySource;
+    return Object.fromEntries(
+      Object.entries(data.trafficBySource).filter(([source]) => sourceFilter.includes(source))
+    );
+  }, [data?.trafficBySource, filters.source]);
+
+  // Filter traffic by medium
+  const filteredTrafficByMedium = useMemo(() => {
+    if (!data?.trafficByMedium) return {};
+    const mediumFilter = Array.isArray(filters.medium) ? filters.medium : [];
+    if (mediumFilter.length === 0) return data.trafficByMedium;
+    return Object.fromEntries(
+      Object.entries(data.trafficByMedium).filter(([medium]) => mediumFilter.includes(medium))
+    );
+  }, [data?.trafficByMedium, filters.medium]);
+
   return (
     <CategorySection
       title="Traffic & Acquisition"
       description="Website visitors and traffic sources from GA4"
     >
+      <SectionFilterBar
+        sectionId={SECTION_IDS.TRAFFIC}
+        fields={fields}
+        filters={filters}
+        onFilterChange={setFilter}
+        onToggle={toggleFilter}
+        onClear={clearFilters}
+        onClearFilter={clearFilter}
+        hasActiveFilters={hasActiveFilters}
+        activeFilterCount={activeFilterCount}
+      />
       <MetricGrid>
         <MetricCard
           title="Sessions"
@@ -96,7 +144,7 @@ export function TrafficSection({ data, comparisonData }: TrafficSectionProps) {
         <div className="mt-4">
           <SectionHeader>Traffic by Source</SectionHeader>
           <PieDistributionChart
-            data={Object.entries(data.trafficBySource).map(([source, count]): PieDataItem => ({
+            data={Object.entries(filteredTrafficBySource).map(([source, count]): PieDataItem => ({
               name: source,
               value: count ?? 0,
             }))}
@@ -110,7 +158,7 @@ export function TrafficSection({ data, comparisonData }: TrafficSectionProps) {
         <div className="mt-4">
           <SectionHeader>Traffic by Medium</SectionHeader>
           <BarComparisonChart
-            data={Object.entries(data.trafficByMedium)
+            data={Object.entries(filteredTrafficByMedium)
               .sort(([, a], [, b]) => b - a)
               .slice(0, 5)
               .map(([medium, count]): BarComparisonDataItem => ({

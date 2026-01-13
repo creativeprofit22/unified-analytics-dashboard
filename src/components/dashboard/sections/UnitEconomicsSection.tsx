@@ -1,10 +1,14 @@
 "use client";
 
+import { useMemo } from "react";
 import type { UnifiedAnalyticsData, UnitEconomicsMetrics } from "@/types/analytics";
 import { CategorySection } from "@/components/CategorySection";
 import { MetricCard } from "@/components/MetricCard";
 import { GaugeChart, type GaugeThreshold } from "@/components/charts";
 import { SectionHeader, createMetric } from "../shared";
+import { useSectionFilters } from "@/contexts/SectionFilterContext";
+import { SectionFilterBar } from "@/components/SectionFilterBar";
+import { getUnitEconomicsFilters, SECTION_IDS } from "@/config/sectionFilters";
 
 const ltvCacThresholds: GaugeThreshold[] = [
   { value: 1, color: "#ef4444", label: "Unsustainable" },
@@ -41,11 +45,63 @@ function MetricGrid({ children }: { children: React.ReactNode }) {
 export function UnitEconomicsSection({ data, comparisonData }: UnitEconomicsSectionProps) {
   if (!data) return null;
 
+  const filterFields = useMemo(() => getUnitEconomicsFilters(data), [data]);
+
+  const {
+    filters,
+    fields,
+    setFilter,
+    toggleFilter,
+    clearFilters,
+    clearFilter,
+    hasActiveFilters,
+    activeFilterCount,
+  } = useSectionFilters(SECTION_IDS.UNIT_ECONOMICS, filterFields);
+
+  // Filter CAC by channel
+  const filteredCacByChannel = useMemo(() => {
+    if (!data?.cacByChannel) return {};
+    const channelFilter = Array.isArray(filters.channel) ? filters.channel : [];
+    if (channelFilter.length === 0) return data.cacByChannel;
+    return Object.fromEntries(
+      Object.entries(data.cacByChannel).filter(([ch]) => channelFilter.includes(ch))
+    );
+  }, [data?.cacByChannel, filters.channel]);
+
+  // Filter LTV by channel
+  const filteredLtvByChannel = useMemo(() => {
+    if (!data?.ltvByChannel) return {};
+    const channelFilter = Array.isArray(filters.channel) ? filters.channel : [];
+    if (channelFilter.length === 0) return data.ltvByChannel;
+    return Object.fromEntries(
+      Object.entries(data.ltvByChannel).filter(([ch]) => channelFilter.includes(ch))
+    );
+  }, [data?.ltvByChannel, filters.channel]);
+
+  // Filter LTV by cohort
+  const filteredLtvByCohort = useMemo(() => {
+    if (!data?.ltvByCohort) return [];
+    const cohortFilter = Array.isArray(filters.cohort) ? filters.cohort : [];
+    if (cohortFilter.length === 0) return data.ltvByCohort;
+    return data.ltvByCohort.filter(c => cohortFilter.includes(c.cohort));
+  }, [data?.ltvByCohort, filters.cohort]);
+
   return (
     <CategorySection
       title="Unit Economics"
       description="Customer acquisition and lifetime value metrics"
     >
+      <SectionFilterBar
+        sectionId={SECTION_IDS.UNIT_ECONOMICS}
+        fields={fields}
+        filters={filters}
+        onFilterChange={setFilter}
+        onToggle={toggleFilter}
+        onClear={clearFilters}
+        onClearFilter={clearFilter}
+        hasActiveFilters={hasActiveFilters}
+        activeFilterCount={activeFilterCount}
+      />
       <MetricGrid>
         <MetricCard
           title="CAC"

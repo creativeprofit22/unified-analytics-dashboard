@@ -11,6 +11,7 @@ export { ComparisonView } from "./ComparisonView";
 export { ThemeToggle } from "./ThemeToggle";
 export { FilterPanel } from "./FilterPanel";
 export { FilterChip } from "./FilterChip";
+export { SectionFilterBar } from "./SectionFilterBar";
 export { ExportButton } from "./ExportButton";
 export { ExportModal } from "./ExportModal";
 export { SettingsButton } from "./SettingsButton";
