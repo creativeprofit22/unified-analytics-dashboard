@@ -39,21 +39,45 @@ export function BarComparisonChart({
   const values = data.map((d) => d.value);
   const colors = data.map((d) => d.color || color);
 
+  // Calculate total for percentage display
+  const total = values.reduce((sum, v) => sum + v, 0);
+
   const option: EChartsOption = {
     tooltip: {
       trigger: "axis",
-      backgroundColor: "var(--bg-primary)",
-      borderColor: "var(--text-secondary)",
+      backgroundColor: "var(--bg-primary, #1f2937)",
+      borderColor: "var(--border-color, rgba(255,255,255,0.1))",
+      borderWidth: 1,
+      padding: [12, 16],
       textStyle: {
         color: "var(--text-primary)",
+        fontSize: 13,
       },
+      extraCssText:
+        "border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);",
       axisPointer: {
         type: "shadow",
+        shadowStyle: {
+          color: "rgba(255,255,255,0.05)",
+        },
       },
       formatter: (params: unknown) => {
         const p = Array.isArray(params) ? params[0] : params;
-        const typedP = p as { name: string; value: number };
-        return `${typedP.name}: ${formatValue(typedP.value)}`;
+        const typedP = p as { name: string; value: number; dataIndex: number; color: string };
+        const percentage = total > 0 ? ((typedP.value / total) * 100).toFixed(1) : "0.0";
+        const barColor = colors[typedP.dataIndex] || color;
+
+        return `<div style="min-width: 140px;">
+          <div style="font-weight: 600; margin-bottom: 8px;">${typedP.name}</div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="color: var(--text-secondary);">Value</span>
+            <span style="font-weight: 600; color: ${barColor};">${formatValue(typedP.value)}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--text-secondary);">Share</span>
+            <span style="font-weight: 500;">${percentage}%</span>
+          </div>
+        </div>`;
       },
     },
     grid: {
@@ -135,6 +159,9 @@ export function BarComparisonChart({
             },
           },
         },
+    animation: true,
+    animationDuration: 300,
+    animationEasing: "cubicOut",
     series: [
       {
         type: "bar",
@@ -146,6 +173,15 @@ export function BarComparisonChart({
           },
         })),
         barMaxWidth: 40,
+        emphasis: {
+          disabled: false,
+          focus: "series",
+          itemStyle: {
+            shadowColor: "rgba(0, 0, 0, 0.3)",
+            shadowBlur: 10,
+            shadowOffsetY: 4,
+          },
+        },
       },
     ],
   };

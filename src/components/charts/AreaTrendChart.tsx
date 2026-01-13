@@ -43,20 +43,61 @@ export function AreaTrendChart({
     tooltip: {
       trigger: "axis",
       backgroundColor: "var(--bg-primary, #1f2937)",
-      borderColor: "var(--text-secondary)",
+      borderColor: "var(--border-color, rgba(255,255,255,0.1))",
+      borderWidth: 1,
+      padding: [12, 16],
       textStyle: {
         color: "var(--text-primary)",
+        fontSize: 13,
+      },
+      extraCssText:
+        "border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);",
+      axisPointer: {
+        type: "cross",
+        crossStyle: {
+          color: "var(--text-secondary)",
+          opacity: 0.5,
+        },
+        lineStyle: {
+          color: color,
+          opacity: 0.6,
+          type: "dashed",
+        },
       },
       formatter: (params: unknown) => {
         const p = Array.isArray(params) ? params[0] : params;
-        const typedP = p as { axisValue: string; value: number };
+        const typedP = p as { axisValue: string; value: number; dataIndex: number };
         const date = new Date(typedP.axisValue);
+        const dayOfWeek = date.toLocaleDateString(undefined, { weekday: "long" });
         const formattedDate = date.toLocaleDateString(undefined, {
           month: "short",
           day: "numeric",
           year: "numeric",
         });
-        return `${formattedDate}<br/>Value: ${formatValue(typedP.value)}`;
+
+        // Calculate comparison to previous data point
+        let comparisonHtml = "";
+        const prevIndex = typedP.dataIndex - 1;
+        if (prevIndex >= 0 && prevIndex < values.length) {
+          const prevValue = values[prevIndex]!;
+          const diff = typedP.value - prevValue;
+          const percentChange = prevValue !== 0 ? ((diff / prevValue) * 100).toFixed(1) : "0.0";
+          const arrow = diff >= 0 ? "↑" : "↓";
+          const changeColor = diff >= 0 ? "#22c55e" : "#ef4444";
+          comparisonHtml = `<div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border-color, rgba(255,255,255,0.1));">
+            <span style="color: var(--text-secondary); font-size: 12px;">vs previous:</span>
+            <span style="color: ${changeColor}; margin-left: 8px; font-weight: 500;">${arrow} ${Math.abs(Number(percentChange))}%</span>
+          </div>`;
+        }
+
+        return `<div style="min-width: 140px;">
+          <div style="color: var(--text-secondary); font-size: 12px; margin-bottom: 4px;">${dayOfWeek}</div>
+          <div style="font-weight: 600; margin-bottom: 8px;">${formattedDate}</div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: var(--text-secondary);">Value</span>
+            <span style="font-weight: 600; color: ${color};">${formatValue(typedP.value)}</span>
+          </div>${comparisonHtml}
+        </div>`;
       },
     },
     grid: {
@@ -109,12 +150,17 @@ export function AreaTrendChart({
           }
         : { show: false },
     },
+    animation: true,
+    animationDuration: 300,
+    animationEasing: "cubicOut",
     series: [
       {
         type: "line",
         data: values,
         smooth: true,
-        symbol: "none",
+        symbol: "circle",
+        symbolSize: 6,
+        showSymbol: false,
         lineStyle: {
           color: color,
           width: 2,
@@ -133,11 +179,18 @@ export function AreaTrendChart({
           },
         },
         emphasis: {
+          disabled: false,
           focus: "series",
+          scale: true,
           itemStyle: {
             color: "var(--bg-primary, #1f2937)",
             borderColor: color,
-            borderWidth: 2,
+            borderWidth: 3,
+            shadowColor: `${color}80`,
+            shadowBlur: 8,
+          },
+          lineStyle: {
+            width: 3,
           },
         },
       },
