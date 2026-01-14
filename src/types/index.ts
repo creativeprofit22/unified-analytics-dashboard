@@ -322,3 +322,25 @@ export type {
 } from "./custom-dashboards";
 
 export { DEFAULT_DASHBOARD_LAYOUT, WIDGET_SIZE_PRESETS } from "./custom-dashboards";
+
+// =============================================================================
+// ATTRIBUTION & MULTI-TOUCH ANALYTICS TYPES
+// =============================================================================
+
+export type {
+  // Attribution Models
+  AttributionModel,
+  Channel,
+  // Touchpoints & Journeys
+  Touchpoint,
+  ConversionJourney,
+  // Attribution Results
+  ChannelAttribution,
+  ModelResult,
+  // Path Analysis
+  TouchpointPath,
+  // Combined Data
+  AttributionSummary,
+  AttributionData,
+  AttributionResponse,
+} from "./attribution";

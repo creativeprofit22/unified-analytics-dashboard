@@ -142,6 +142,9 @@ export default function HomePage() {
                 <a href="/predictions" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
                   Predictions
                 </a>
+                <a href="/attribution" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+                  Attribution
+                </a>
               </nav>
             </div>
             <div className="flex items-center gap-3 flex-wrap">

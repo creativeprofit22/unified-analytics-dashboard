@@ -2,9 +2,9 @@
 
 ## Pipeline State
 Phase: refactor-hunt
-Feature: Wire Phase 1 Alerting Components to Routes
-Files-Validated: src/app/alerts/page.tsx, src/app/page.tsx, src/components/alerts/*.tsx
-Validation-Report: reports/validation-phase1-alerting-wiring.md
+Feature: Phase 3 Multi-touch Attribution
+Files-Validated: src/types/attribution.ts, src/lib/mock/attribution.ts, src/app/api/attribution/route.ts, src/hooks/useAttribution.ts, src/components/attribution/*.tsx, src/app/attribution/page.tsx
+Validation-Report: reports/validation-phase3-attribution.md
 
 ## UI Roadmap
 
@@ -48,14 +48,14 @@ Validation-Report: reports/validation-phase1-alerting-wiring.md
 - **Multi-workspace** - Team/client separation with different permissions
 
 ## Last Session (2026-01-14)
-**Feature**: Wire Phase 1 Alerting Components to Routes - VALIDATED
-- Created /alerts page wired to AlertPanel, AnomalyCard, ThresholdAlert, GoalTracker
-- Added navigation link from main dashboard header
-- Verified alerts export from components/index.ts
-- Fixed 4 bugs: HTTP validation, raw fetch → useAlerts hook, status config fallbacks
-- Bottlenecks: 7 found, 1 fixed, 6 deferred to refactor phase
-- TypeCheck: PASS, API: PASS, UI: PASS, Wiring: PASS
-- Validation Report: reports/validation-phase1-alerting-wiring.md
+**Feature**: Phase 3 Multi-touch Attribution - VALIDATED
+- Created full attribution system: types, mock data, API, hook, components, page
+- 4 attribution models: first-touch, last-touch, linear, time-decay
+- ECharts visualizations: bar chart + Sankey flow diagram
+- Fixed 9 bugs: empty array guards, division by zero, API response validation
+- Bottlenecks: 12 found, 3 critical fixed, 9 deferred
+- TypeCheck: PASS, Build: PASS, API: PASS, UI: PASS, Wiring: PASS
+- Validation Report: reports/validation-phase3-attribution.md
 
 ## Previous Sessions
 - **Time Range UI Selector**: Built TimeRangePicker with presets (2026-01-12)
