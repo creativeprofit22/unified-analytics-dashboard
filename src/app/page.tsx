@@ -43,6 +43,14 @@ export default function HomePage() {
               <p className="text-[var(--text-secondary)] mt-1 text-sm sm:text-base">
                 Multi-platform analytics for GoHighLevel
               </p>
+              <nav className="flex items-center gap-4 mt-2">
+                <a href="/benchmarks" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+                  Benchmarks
+                </a>
+                <a href="/dashboards" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+                  Custom Dashboards
+                </a>
+              </nav>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
               <ExportButton data={data ?? null} />

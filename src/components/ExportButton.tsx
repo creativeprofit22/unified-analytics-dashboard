@@ -1,14 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { ExportModal } from "./ExportModal";
-import type { UnifiedAnalyticsData } from "@/types";
+import { ExportDialog } from "@/components/export";
+import type { UnifiedAnalyticsData, TimeRange } from "@/types";
 
 interface ExportButtonProps {
   data: UnifiedAnalyticsData | null;
+  timeRange?: TimeRange;
 }
 
-export function ExportButton({ data }: ExportButtonProps) {
+export function ExportButton({ data, timeRange = "30d" }: ExportButtonProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -29,10 +30,11 @@ export function ExportButton({ data }: ExportButtonProps) {
         <span className="hidden sm:inline">Export</span>
       </button>
 
-      <ExportModal
+      <ExportDialog
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         data={data}
+        currentTimeRange={timeRange}
       />
     </>
   );
