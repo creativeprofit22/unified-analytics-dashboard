@@ -247,6 +247,8 @@ export function WidgetGrid({
   renderWidget,
   className,
 }: WidgetGridProps) {
+  console.log("🔵 WidgetGrid render - widgets:", widgets.length, "containerWidth:", "pending");
+
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [selectedWidgetId, setSelectedWidgetId] = useState<string | null>(null);
@@ -579,12 +581,15 @@ export function WidgetGrid({
   }, []);
 
   if (containerWidth === 0) {
+    console.log("🔵 WidgetGrid: containerWidth is 0, showing skeleton");
     return (
       <div ref={containerRef} className={cn("w-full min-h-[200px]", className)}>
         <div className="animate-pulse h-48 rounded-lg bg-[var(--bg-secondary,rgba(255,255,255,0.05))]" />
       </div>
     );
   }
+
+  console.log("🔵 WidgetGrid: rendering", widgets.length, "widgets, containerWidth:", containerWidth);
 
   return (
     <div
@@ -620,9 +625,14 @@ export function WidgetGrid({
 
       {/* Widgets */}
       {widgets.map((widget) => {
-        if (!widget.visible) return null;
+        console.log("🔵 Mapping widget:", widget.id, widget.title, "visible:", widget.visible);
+        if (!widget.visible) {
+          console.log("🔵 Widget hidden, skipping:", widget.id);
+          return null;
+        }
 
         const pos = getWidgetPosition(widget, breakpoint);
+        console.log("🔵 Widget position:", widget.id, pos);
         const isDragging = dragState.isDragging && dragState.widgetId === widget.id;
         const isSelected = selectedWidgetId === widget.id;
 

@@ -101,6 +101,9 @@ export function DashboardEditor({
   // Track if dashboard is new
   const isNewDashboard = !initialDashboard?.id;
 
+  // Debug: track re-renders
+  console.log("🔷 DashboardEditor render:", { widgetsCount: widgets.length, editMode, showWidgetPicker });
+
   // Handle widget layout changes
   const handleLayoutChange = useCallback((updatedWidgets: Widget[]) => {
     setWidgets(updatedWidgets);
@@ -122,17 +125,31 @@ export function DashboardEditor({
   // Handle adding a new widget
   const handleAddWidget = useCallback(
     (type: WidgetType, title: string, dataBinding: WidgetConfig["dataBinding"]) => {
-      // Find the lowest available y position
-      let maxY = 0;
-      for (const widget of widgets) {
-        const pos = widget.position.lg;
-        const bottom = pos.y + pos.h;
-        if (bottom > maxY) maxY = bottom;
-      }
+      console.log("🟢 DashboardEditor.handleAddWidget called:", { type, title, dataBinding });
 
-      const newWidget = createWidget(type, title, dataBinding, { x: 0, y: maxY });
-      setWidgets((prev) => [...prev, newWidget]);
-      setHasUnsavedChanges(true);
+      try {
+        // Find the lowest available y position
+        let maxY = 0;
+        for (const widget of widgets) {
+          const pos = widget.position.lg;
+          const bottom = pos.y + pos.h;
+          if (bottom > maxY) maxY = bottom;
+        }
+        console.log("🟢 Calculated maxY:", maxY, "from", widgets.length, "existing widgets");
+
+        const newWidget = createWidget(type, title, dataBinding, { x: 0, y: maxY });
+        console.log("🟢 Created widget:", newWidget.id, newWidget.title, "visible:", newWidget.visible);
+
+        setWidgets((prev) => {
+          const updated = [...prev, newWidget];
+          console.log("🟢 Widgets state updating:", prev.length, "→", updated.length, "widgets");
+          return updated;
+        });
+        setHasUnsavedChanges(true);
+        console.log("🟢 handleAddWidget completed successfully");
+      } catch (error) {
+        console.error("🔴 Error in handleAddWidget:", error);
+      }
     },
     [widgets]
   );

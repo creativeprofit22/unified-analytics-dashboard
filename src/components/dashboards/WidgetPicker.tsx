@@ -202,7 +202,28 @@ export function WidgetPicker({
 
   // Handle adding the widget
   const handleAddWidget = useCallback(() => {
-    if (!selectedWidget || !selectedSource || !selectedField || !widgetTitle) return;
+    console.log("🟡 WidgetPicker handleAddWidget triggered:", {
+      selectedWidget: selectedWidget?.type,
+      selectedSource,
+      selectedField,
+      widgetTitle,
+    });
+
+    if (!selectedWidget || !selectedSource || !selectedField || !widgetTitle) {
+      console.warn("🔴 WidgetPicker: Missing required fields:", {
+        hasWidget: !!selectedWidget,
+        hasSource: !!selectedSource,
+        hasField: !!selectedField,
+        hasTitle: !!widgetTitle,
+      });
+      return;
+    }
+
+    console.log("🟢 WidgetPicker: Calling onAddWidget with:", {
+      type: selectedWidget.type,
+      title: widgetTitle,
+      dataBinding: { source: selectedSource, field: selectedField },
+    });
 
     onAddWidget(selectedWidget.type, widgetTitle, {
       source: selectedSource,
@@ -280,6 +301,7 @@ export function WidgetPicker({
 
         {/* Content */}
         <div className="flex-1 overflow-auto p-6">
+          {(() => { console.log("🔵 WidgetPicker render:", { step, selectedWidget: selectedWidget?.type, selectedSource, selectedField, widgetTitle, availableFields: availableFields.length }); return null; })()}
           {step === "select" ? (
             <>
               {/* Filter mode toggle */}

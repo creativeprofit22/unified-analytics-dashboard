@@ -3,6 +3,13 @@
 import { ReactNode } from "react";
 import Link from "next/link";
 import { DashboardEditor } from "@/components/dashboards";
+import {
+  PieChartWidget,
+  LineChartWidget,
+  BarChartWidget,
+  AreaChartWidget,
+  MetricCardWidget,
+} from "@/components/dashboards/charts";
 import type { Widget } from "@/types/custom-dashboards";
 
 function renderWidget(widget: Widget): ReactNode {
@@ -10,28 +17,15 @@ function renderWidget(widget: Widget): ReactNode {
 
   switch (widget.config.type) {
     case "metric-card":
-      return (
-        <div className={baseStyle}>
-          <div className="text-center">
-            <div className="text-3xl font-bold text-[var(--text-primary)]">--</div>
-            <div className="text-sm text-[var(--text-secondary)]">{widget.title}</div>
-          </div>
-        </div>
-      );
+      return <MetricCardWidget widget={widget} />;
     case "line-chart":
+      return <LineChartWidget widget={widget} />;
     case "bar-chart":
+      return <BarChartWidget widget={widget} />;
     case "pie-chart":
+      return <PieChartWidget widget={widget} />;
     case "area-chart":
-      return (
-        <div className={baseStyle}>
-          <div className="text-center text-[var(--text-secondary)]">
-            <svg className="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4v16" />
-            </svg>
-            <div className="text-sm">{widget.title}</div>
-          </div>
-        </div>
-      );
+      return <AreaChartWidget widget={widget} />;
     case "table":
       return (
         <div className={baseStyle}>
