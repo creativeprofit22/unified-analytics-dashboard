@@ -2,9 +2,9 @@
 
 ## Pipeline State
 Phase: refactor-hunt
-Feature: Phase 3 Multi-touch Attribution
-Files-Validated: src/types/attribution.ts, src/lib/mock/attribution.ts, src/app/api/attribution/route.ts, src/hooks/useAttribution.ts, src/components/attribution/*.tsx, src/app/attribution/page.tsx
-Validation-Report: reports/validation-phase3-attribution.md
+Feature: Channel ROI Calculator
+Files-Validated: src/types/roi.ts, src/lib/mock/roi.ts, src/app/api/roi/route.ts, src/hooks/useROI.ts, src/components/roi/*.tsx, src/app/attribution/page.tsx
+Validation-Report: reports/validation-channel-roi-calculator.md
 
 ## UI Roadmap
 
@@ -48,14 +48,15 @@ Validation-Report: reports/validation-phase3-attribution.md
 - **Multi-workspace** - Team/client separation with different permissions
 
 ## Last Session (2026-01-14)
-**Feature**: Phase 3 Multi-touch Attribution - VALIDATED
-- Created full attribution system: types, mock data, API, hook, components, page
-- 4 attribution models: first-touch, last-touch, linear, time-decay
-- ECharts visualizations: bar chart + Sankey flow diagram
-- Fixed 9 bugs: empty array guards, division by zero, API response validation
-- Bottlenecks: 12 found, 3 critical fixed, 9 deferred
+**Feature**: Channel ROI Calculator - VALIDATED
+- Created full ROI system: types, mock data, API, hook, components
+- Integrated into attribution page (shows ROI first, then attribution)
+- ROI metrics: ROI%, ROAS, CAC, LTV, LTV:CAC ratio, payback period
+- ECharts horizontal bar chart, sortable cost/benefit table
+- Fixed 7 bugs: division by zero guards, empty array handling, null checks
+- Bottlenecks: 8 found, 5 critical fixed, 3 deferred
 - TypeCheck: PASS, Build: PASS, API: PASS, UI: PASS, Wiring: PASS
-- Validation Report: reports/validation-phase3-attribution.md
+- Validation Report: reports/validation-channel-roi-calculator.md
 
 ## Previous Sessions
 - **Time Range UI Selector**: Built TimeRangePicker with presets (2026-01-12)

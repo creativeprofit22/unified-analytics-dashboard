@@ -344,3 +344,21 @@ export type {
   AttributionData,
   AttributionResponse,
 } from "./attribution";
+
+// =============================================================================
+// CHANNEL ROI CALCULATOR TYPES
+// =============================================================================
+
+export type {
+  // Cost Inputs
+  ChannelCost,
+  // ROI Metrics
+  ChannelROIMetrics,
+  // Summary
+  ROISummary,
+  // Trend Data
+  ROITrendPoint,
+  // Combined Data
+  ROIData,
+  ROIResponse,
+} from "./roi";
