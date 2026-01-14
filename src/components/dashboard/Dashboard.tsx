@@ -19,6 +19,7 @@ import {
   SegmentationSection,
   CampaignsSection,
 } from "./sections";
+import { RevenueLeakageDashboard } from "@/components/revenue-leakage";
 
 interface DashboardProps {
   timeRange?: TimeRange;
@@ -143,6 +144,7 @@ export function Dashboard({ timeRange = "30d", comparison, className, syncHash =
         <RevenueSection data={data.revenue} comparisonData={comparisonData?.revenue} />
         <SubscriptionsSection data={data.subscriptions} comparisonData={comparisonData?.subscriptions} />
         <PaymentsSection data={data.payments} comparisonData={comparisonData?.payments} />
+        {data.payments && <RevenueLeakageDashboard payments={data.payments} />}
       </TabPanel>
 
       <TabPanel tabId="economics" activeTab={activeTab} className="space-y-6">
