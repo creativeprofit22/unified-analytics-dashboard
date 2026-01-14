@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { useAnalytics } from "@/hooks";
+import { useAnalytics, useAlerts } from "@/hooks";
 import { useFilters } from "@/contexts/FilterContext";
 import type { TimeRange, TrafficSource, CampaignChannel, ComparisonConfig } from "@/types/analytics";
 import { cn } from "@/utils/cn";
-import { TabNavigation, TabPanel, type TabId } from "@/components";
+import { TabNavigation, TabPanel, AlertPanel, type TabId } from "@/components";
 import {
   TrafficSection,
   SEOSection,
@@ -51,6 +51,7 @@ function ErrorDisplay({ message }: { message: string }) {
 export function Dashboard({ timeRange = "30d", comparison, className, syncHash = false }: DashboardProps) {
   const { filters, setOptions, activeTab, setActiveTab } = useFilters();
   const { data, comparisonData, isLoading, error } = useAnalytics({ timeRange, filters, comparison });
+  const { data: alertsData } = useAlerts();
 
   const handleTabChange = useCallback((tabId: TabId) => {
     setActiveTab(tabId);
@@ -106,6 +107,18 @@ export function Dashboard({ timeRange = "30d", comparison, className, syncHash =
         onTabChange={handleTabChange}
         syncHash={syncHash}
       />
+
+      <TabPanel tabId="alerts" activeTab={activeTab} className="space-y-6">
+        {alertsData ? (
+          <AlertPanel
+            anomalies={alertsData.anomalies}
+            thresholdAlerts={alertsData.thresholdAlerts}
+            goals={alertsData.goals}
+          />
+        ) : (
+          <div className="animate-pulse h-48 rounded-lg bg-[var(--bg-secondary,rgba(255,255,255,0.05))]" />
+        )}
+      </TabPanel>
 
       <TabPanel tabId="acquisition" activeTab={activeTab} className="space-y-6">
         <TrafficSection data={data.traffic} comparisonData={comparisonData?.traffic} />

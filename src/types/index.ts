@@ -144,6 +144,29 @@ export type {
 } from "./api";
 
 // =============================================================================
+// ALERTS & MONITORING TYPES
+// =============================================================================
+
+export type {
+  // Anomaly Detection
+  MetricType,
+  AnomalySeverity,
+  AnomalyDirection,
+  Anomaly,
+  // Threshold Alerts
+  ThresholdOperator,
+  ThresholdStatus,
+  ThresholdRule,
+  ThresholdAlert,
+  // Goals
+  GoalStatus,
+  Goal,
+  // Combined Data
+  AlertsData,
+  AlertsResponse,
+} from "./alerts";
+
+// =============================================================================
 // RESPONSE TYPES
 // =============================================================================
 

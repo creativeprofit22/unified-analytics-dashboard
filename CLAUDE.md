@@ -2,8 +2,8 @@
 
 ## Pipeline State
 Phase: build
-Feature: (select next)
-Features-Remaining: 4
+Feature: Phase 1 - Alerting & Monitoring
+Features-Remaining: 4 phases
 
 ## UI Roadmap
 
@@ -17,12 +17,34 @@ Features-Remaining: 4
 - **Dashboard UI Components** - MetricCard, CategorySection, 10 section files
 - **Tab Navigation** - TabNavigation, TabPanel components
 - **Theme Toggle** - ThemeToggle component
+- **Settings Page** - User preferences (theme, default time range, etc.)
 
-### Pending (Priority Order)
-1. **Real-time Updates** - WebSocket/polling for live data refresh
-2. **Embed Mode** - iframe-optimized view with postMessage API
-3. **Authentication** - JWT/session management for production
-4. **Settings Page** - User preferences (theme, default time range, etc.)
+### Phase 1: Alerting & Monitoring (Current)
+1. **Anomaly Detection** - Flag unusual drops/spikes in metrics (conversion rate, traffic, churn)
+2. **Threshold Alerts** - Configurable alerts when metrics cross limits (MRR < target, CAC > limit)
+3. **Goal Tracking** - Set KPI targets with progress indicators
+
+### Phase 2: Predictive Analytics
+1. **Revenue Forecasting** - Project MRR/ARR based on cohort trends
+2. **Churn Prediction** - Identify at-risk subscribers before they cancel
+3. **LTV Projection** - Estimate future customer value from early behavior
+
+### Phase 3: Attribution & Analysis
+1. **Multi-touch Attribution** - First-touch, last-touch, linear, time-decay models
+2. **Channel ROI Calculator** - True cost/benefit per acquisition channel
+3. **A/B Test Integration** - Track experiment impact on conversions
+
+### Phase 4: Reporting & Collaboration
+1. **Custom Report Builder** - Drag-and-drop metrics, save templates
+2. **Scheduled Email Reports** - Daily/weekly digests to stakeholders
+3. **Annotations** - Mark product launches, marketing campaigns, incidents on charts
+
+### Backlog
+- **Real-time Updates** - WebSocket/polling for live data refresh
+- **Embed Mode** - iframe-optimized view with postMessage API
+- **Authentication** - JWT/session management for production
+- **Data Source Status** - Health check for GA4, Stripe, Search Console connections
+- **Multi-workspace** - Team/client separation with different permissions
 
 ## Last Session (2026-01-12)
 **Feature**: ECharts TrendChart - BUILT

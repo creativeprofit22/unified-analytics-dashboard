@@ -7,6 +7,7 @@
 export { useAnalytics, type UseAnalyticsParams, type UseAnalyticsReturn } from './useAnalytics';
 export { usePlatformAnalytics, type UsePlatformAnalyticsParams, type UsePlatformAnalyticsReturn } from './usePlatformAnalytics';
 export { useHealthCheck, type UseHealthCheckParams, type UseHealthCheckReturn } from './useHealthCheck';
+export { useAlerts, type UseAlertsReturn } from './useAlerts';
 
 // Shared utilities and types
 export {

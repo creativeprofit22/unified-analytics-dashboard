@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Dashboard, TimeRangePicker, ThemeToggle, FilterPanel, ExportButton, ComparisonToggle, ComparisonView, SettingsButton } from "@/components";
+import { Dashboard, TimeRangePicker, ThemeToggle, FilterPanel, ExportButton, ComparisonToggle, ComparisonView, SettingsButton, NotificationBell, ToastContainer } from "@/components";
 import { useAnalytics } from "@/hooks";
 import { useFilters } from "@/contexts/FilterContext";
 import type { TimeRange, CustomDateRange, ComparisonConfig } from "@/types/analytics";
@@ -31,6 +31,8 @@ export default function HomePage() {
   };
 
   return (
+    <>
+    <ToastContainer />
     <main className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
       <header className="sticky top-0 z-30 bg-[var(--bg-primary)] border-b border-[var(--border-primary)] px-4 sm:px-6 lg:px-8 py-4 mb-6">
         <div className="flex flex-col gap-4">
@@ -45,6 +47,7 @@ export default function HomePage() {
             <div className="flex items-center gap-3 flex-wrap">
               <ExportButton data={data ?? null} />
               <FilterPanel />
+              <NotificationBell />
               <ThemeToggle />
               <SettingsButton />
               {!comparison.enabled && (
@@ -95,5 +98,6 @@ export default function HomePage() {
         )}
       </div>
     </main>
+    </>
   );
 }

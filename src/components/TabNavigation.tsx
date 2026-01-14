@@ -4,6 +4,7 @@ import { useId, useEffect, useRef, useCallback } from "react";
 import { cn } from "@/utils/cn";
 
 export type TabId =
+  | "alerts"
   | "acquisition"
   | "conversions"
   | "revenue"
@@ -18,6 +19,7 @@ export interface Tab {
 }
 
 export const DASHBOARD_TABS: Tab[] = [
+  { id: "alerts", label: "Alerts", description: "Anomalies, Thresholds & Goals" },
   { id: "acquisition", label: "Acquisition", description: "Traffic & SEO" },
   { id: "conversions", label: "Conversions", description: "Funnel Analytics" },
   { id: "revenue", label: "Revenue", description: "Revenue, Subscriptions & Payments" },

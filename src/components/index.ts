@@ -26,3 +26,9 @@ export * from "./charts";
 export { Dashboard } from "./dashboard";
 export * from "./dashboard/sections";
 export * from "./dashboard/shared";
+
+// Alerts & Monitoring components
+export * from "./alerts";
+
+// Notifications
+export * from "./notifications";

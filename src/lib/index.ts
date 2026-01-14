@@ -21,6 +21,9 @@ export {
   platformColors,
 } from './utils';
 
+// Alerts & Monitoring
+export { detectAnomalies, evaluateThreshold, evaluateGoal } from './alerts';
+
 // Re-export types for convenience
 export type {
   ApiResponse,
@@ -30,3 +33,19 @@ export type {
   TimeRange,
   HealthResponse,
 } from './api-client';
+
+// Alert types
+export type {
+  Anomaly,
+  AnomalySeverity,
+  AnomalyDirection,
+  MetricType,
+  ThresholdRule,
+  ThresholdAlert,
+  ThresholdStatus,
+  ThresholdOperator,
+  Goal,
+  GoalStatus,
+  AlertsData,
+  AlertsResponse,
+} from './alerts';
