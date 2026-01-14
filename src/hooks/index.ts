@@ -12,6 +12,7 @@ export { usePredictions, type UsePredictionsReturn } from './usePredictions';
 export { useAttribution, type UseAttributionReturn } from './useAttribution';
 export { useROI, type UseROIReturn } from './useROI';
 export { useABTest, type UseABTestReturn } from './useABTest';
+export { useReportBuilder, type UseReportBuilderReturn, type CreateTemplateInput, type UpdateTemplateInput } from './useReportBuilder';
 
 // Shared utilities and types
 export {

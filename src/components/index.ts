@@ -47,3 +47,6 @@ export * from "./roi";
 
 // A/B Test
 export * from "./abtest";
+
+// Report Builder
+export * from "./report-builder";

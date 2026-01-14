@@ -387,3 +387,29 @@ export type {
   ABTestData,
   ABTestResponse,
 } from "./abtest";
+
+// =============================================================================
+// CUSTOM REPORT BUILDER TYPES
+// =============================================================================
+
+export type {
+  // Metric Types
+  MetricCategory,
+  MetricUnit,
+  MetricAggregation,
+  MetricDefinition,
+  // Report Template Types
+  ChartType,
+  MetricWidth,
+  ReportMetric,
+  ReportTemplate,
+  // Export Types
+  ExportFormat as ReportExportFormat,
+  ExportOptions as ReportExportOptions,
+  // Report Data Types
+  ReportDataPoint,
+  ReportData,
+  // API Response Types
+  ReportBuilderData,
+  ReportBuilderResponse,
+} from "./report-builder";

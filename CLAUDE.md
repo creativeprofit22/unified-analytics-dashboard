@@ -2,9 +2,9 @@
 
 ## Pipeline State
 Phase: refactor-hunt
-Feature: Channel ROI Calculator
-Files-Validated: src/types/roi.ts, src/lib/mock/roi.ts, src/app/api/roi/route.ts, src/hooks/useROI.ts, src/components/roi/*.tsx, src/app/attribution/page.tsx
-Validation-Report: reports/validation-channel-roi-calculator.md
+Feature: Custom Report Builder
+Files-Validated: src/types/report-builder.ts, src/lib/mock/report-builder.ts, src/lib/export/*.ts, src/components/report-builder/*.tsx, src/app/api/reports/*.ts, src/hooks/useReportBuilder.ts, src/app/reports/page.tsx
+Validation-Report: reports/validation-custom-report-builder.md
 
 ## UI Roadmap
 
@@ -48,17 +48,20 @@ Validation-Report: reports/validation-channel-roi-calculator.md
 - **Multi-workspace** - Team/client separation with different permissions
 
 ## Last Session (2026-01-14)
-**Feature**: Channel ROI Calculator - VALIDATED
-- Created full ROI system: types, mock data, API, hook, components
-- Integrated into attribution page (shows ROI first, then attribution)
-- ROI metrics: ROI%, ROAS, CAC, LTV, LTV:CAC ratio, payback period
-- ECharts horizontal bar chart, sortable cost/benefit table
-- Fixed 7 bugs: division by zero guards, empty array handling, null checks
-- Bottlenecks: 8 found, 5 critical fixed, 3 deferred
-- TypeCheck: PASS, Build: PASS, API: PASS, UI: PASS, Wiring: PASS
-- Validation Report: reports/validation-channel-roi-calculator.md
+**Feature**: Custom Report Builder - VALIDATED
+- Types: MetricDefinition, ReportTemplate, ReportMetric, ExportFormat, ReportData
+- Mock: 30 metrics across 6 categories, 4 default templates
+- Export: 6 formats (CSV, Excel, PDF, Markdown, JSON, PNG) with utils
+- Components: ReportBuilder, MetricSelector, ReportPreview, MetricCard, TemplateModal
+- API: /api/reports (CRUD), /api/reports/[templateId], /api/reports/export
+- Hook: useReportBuilder with SWR, save/update/delete/export methods
+- Page: /reports with export integration
+- Fixed 4 critical bugs: order validation off-by-one, percentage formatting, null assertions, random render jitter
+- TypeCheck: PASS, Build: PASS
+- Validation Report: reports/validation-custom-report-builder.md
 
 ## Previous Sessions
+- **Channel ROI Calculator**: Built and validated (2026-01-14)
 - **Time Range UI Selector**: Built TimeRangePicker with presets (2026-01-12)
 - **Dashboard UI Components**: Built, validated, refactored - split into 10 sections (2026-01-12)
 

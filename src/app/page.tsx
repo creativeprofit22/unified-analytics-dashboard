@@ -136,6 +136,9 @@ export default function HomePage() {
                 <a href="/dashboards" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
                   Custom Dashboards
                 </a>
+                <a href="/reports" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+                  Reports
+                </a>
                 <a href="/alerts" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
                   Alerts
                 </a>
