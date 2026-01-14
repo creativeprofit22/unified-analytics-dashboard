@@ -9,8 +9,9 @@ import { exportToCSV, downloadCSV } from "./csv";
 import { exportToJSON, downloadJSON, type JSONExportOptions } from "./json";
 import { exportToMarkdown, downloadMarkdown } from "./markdown";
 import { exportToPDF, downloadPDFHTML } from "./pdf";
+import { exportToExcel, downloadExcel } from "./excel";
 
-export type ExportFormat = "csv" | "json" | "markdown" | "pdf";
+export type ExportFormat = "csv" | "json" | "xlsx" | "markdown" | "pdf";
 
 export interface ExportOptions {
   /** Filename without extension */
@@ -22,6 +23,7 @@ export interface ExportOptions {
 const formatExtensions: Record<ExportFormat, string> = {
   csv: ".csv",
   json: ".json",
+  xlsx: ".xls",
   markdown: ".md",
   pdf: ".pdf",
 };
@@ -29,6 +31,7 @@ const formatExtensions: Record<ExportFormat, string> = {
 const formatLabels: Record<ExportFormat, string> = {
   csv: "CSV (Spreadsheet)",
   json: "JSON (Raw Data)",
+  xlsx: "Excel (Workbook)",
   markdown: "Markdown (Document)",
   pdf: "PDF (Print)",
 };
@@ -36,6 +39,7 @@ const formatLabels: Record<ExportFormat, string> = {
 const formatDescriptions: Record<ExportFormat, string> = {
   csv: "Tabular data for Excel, Google Sheets, or data analysis tools",
   json: "Structured data for developers and programmatic access",
+  xlsx: "Multi-sheet workbook with formatted data for Excel",
   markdown: "Formatted document with tables for documentation",
   pdf: "Print-ready report via browser print dialog",
 };
@@ -56,6 +60,9 @@ export function exportData(
       break;
     case "json":
       downloadJSON(data, `${baseFilename}${formatExtensions.json}`, options.json);
+      break;
+    case "xlsx":
+      downloadExcel(data, `${baseFilename}${formatExtensions.xlsx}`);
       break;
     case "markdown":
       downloadMarkdown(data, `${baseFilename}${formatExtensions.markdown}`);
@@ -79,6 +86,8 @@ export function getExportContent(
       return exportToCSV(data);
     case "json":
       return exportToJSON(data, options.json);
+    case "xlsx":
+      return exportToExcel(data);
     case "markdown":
       return exportToMarkdown(data);
   }
@@ -106,5 +115,6 @@ export function getAllFormats() {
 // Re-export individual exporters for direct access
 export { exportToCSV, downloadCSV } from "./csv";
 export { exportToJSON, downloadJSON, type JSONExportOptions } from "./json";
+export { exportToExcel, downloadExcel } from "./excel";
 export { exportToMarkdown, downloadMarkdown } from "./markdown";
 export { exportToPDF, downloadPDFHTML } from "./pdf";

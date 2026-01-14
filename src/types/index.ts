@@ -212,3 +212,113 @@ export type {
   SegmentationResponse,
   CampaignResponse,
 } from "./api";
+
+// =============================================================================
+// BENCHMARK TYPES
+// =============================================================================
+
+export type {
+  // Categories & Metrics
+  BenchmarkCategory,
+  BenchmarkMetricId,
+  BenchmarkMetric,
+  // Industry Data
+  BenchmarkPercentiles,
+  IndustryBenchmark,
+  // Performance Tiers
+  PerformanceTier,
+  PerformanceTierConfig,
+  // Comparison Results
+  BenchmarkComparison,
+  UserMetrics,
+  // API Types
+  BenchmarkRequest,
+  BenchmarkResponse,
+  BenchmarksData,
+} from "./benchmarks";
+
+export {
+  BENCHMARK_CATEGORY_LABELS,
+  PERFORMANCE_TIERS,
+  isBenchmarkCategory,
+  isBenchmarkMetricId,
+} from "./benchmarks";
+
+// =============================================================================
+// DATA EXPORT TYPES
+// =============================================================================
+
+export type {
+  // Export Formats
+  ExportFileFormat,
+  ExportFormatInfo,
+  // Data Sections
+  ExportSection,
+  ExportSectionInfo,
+  // Export Configuration
+  ExportConfig,
+  // Scheduled Reports
+  ReportFrequency,
+  DayOfWeek,
+  DeliveryMethod,
+  EmailDeliveryConfig,
+  WebhookDeliveryConfig,
+  StorageDeliveryConfig,
+  DeliveryConfig,
+  ReportSchedule,
+  ScheduledReportStatus,
+  ScheduledReport,
+  // Report History
+  ReportRunStatus,
+  ReportRun,
+  // API Types
+  ExportRequest,
+  ExportResult,
+  ExportResponse,
+  CreateScheduledReportRequest,
+  UpdateScheduledReportRequest,
+  ScheduledReportsResponse,
+  ReportHistoryResponse,
+  // Preview
+  ExportPreview,
+} from "./export";
+
+export { DEFAULT_EXPORT_CONFIG } from "./export";
+
+// =============================================================================
+// CUSTOM DASHBOARDS TYPES
+// =============================================================================
+
+export type {
+  // Widget Types
+  WidgetType,
+  WidgetSize,
+  DataSourceCategory,
+  GridPosition,
+  ResponsiveGridPosition,
+  // Widget Configuration
+  WidgetDataBinding,
+  WidgetStyle,
+  ChartOptions,
+  MetricCardOptions,
+  TableOptions,
+  WidgetConfig,
+  // Widget Instance
+  Widget,
+  // Dashboard Layout
+  DashboardLayout,
+  // Saved Dashboard
+  DashboardVisibility,
+  DashboardMeta,
+  SavedDashboard,
+  DashboardInput,
+  // Widget Registry Types
+  WidgetTypeInfo,
+  // API Types
+  DashboardListResponse,
+  DashboardResponse,
+  DashboardMutationResponse,
+  DashboardErrorResponse,
+} from "./custom-dashboards";
+
+export { DEFAULT_DASHBOARD_LAYOUT, WIDGET_SIZE_PRESETS } from "./custom-dashboards";

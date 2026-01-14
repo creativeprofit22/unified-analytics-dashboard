@@ -49,3 +49,29 @@ export type {
   AlertsData,
   AlertsResponse,
 } from './alerts';
+
+// Benchmarks
+export {
+  compareToBenchmark,
+  compareAllMetrics,
+  getAvailableMetrics,
+  getMetricsByCategory,
+  getBenchmarkMetric,
+  getIndustryBenchmark,
+  calculatePercentileRank,
+  getPerformanceTier,
+} from './benchmarks';
+
+// Benchmark types
+export type {
+  BenchmarkCategory,
+  BenchmarkMetricId,
+  BenchmarkMetric,
+  BenchmarkPercentiles,
+  IndustryBenchmark,
+  PerformanceTier,
+  BenchmarkComparison,
+  UserMetrics,
+  BenchmarkResponse,
+  BenchmarksData,
+} from './benchmarks';
