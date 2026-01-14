@@ -167,6 +167,33 @@ export type {
 } from "./alerts";
 
 // =============================================================================
+// PREDICTIVE ANALYTICS TYPES
+// =============================================================================
+
+export type {
+  // Revenue Forecasting
+  ForecastMetric,
+  ForecastPeriod,
+  ForecastTrend,
+  ForecastDataPoint,
+  RevenueForecast,
+  // Churn Prediction
+  ChurnRiskLevel,
+  ChurnRiskFactor,
+  AtRiskCustomer,
+  ChurnPrediction,
+  // LTV Projection
+  LTVImpactDirection,
+  LTVSegment,
+  LTVProjectionPoint,
+  LTVFactor,
+  LTVProjection,
+  // Combined Data
+  PredictionsData,
+  PredictionsResponse,
+} from "./predictions";
+
+// =============================================================================
 // RESPONSE TYPES
 // =============================================================================
 

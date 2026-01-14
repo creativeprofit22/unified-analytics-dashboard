@@ -5,6 +5,7 @@ import { cn } from "@/utils/cn";
 
 export type TabId =
   | "alerts"
+  | "predictions"
   | "acquisition"
   | "conversions"
   | "revenue"
@@ -20,6 +21,7 @@ export interface Tab {
 
 export const DASHBOARD_TABS: Tab[] = [
   { id: "alerts", label: "Alerts", description: "Anomalies, Thresholds & Goals" },
+  { id: "predictions", label: "Predictions", description: "Forecasts & Risk Analysis" },
   { id: "acquisition", label: "Acquisition", description: "Traffic & SEO" },
   { id: "conversions", label: "Conversions", description: "Funnel Analytics" },
   { id: "revenue", label: "Revenue", description: "Revenue, Subscriptions & Payments" },

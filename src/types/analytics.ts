@@ -969,6 +969,175 @@ export interface UnifiedAnalyticsData {
 }
 
 // =============================================================================
+// 11. PREDICTIVE ANALYTICS TYPES
+// =============================================================================
+
+/**
+ * Single data point for forecast time series.
+ */
+export interface ForecastDataPoint {
+  /** ISO 8601 date string */
+  date: string;
+  /** Forecasted or actual value */
+  value: number;
+}
+
+/**
+ * Confidence interval data for forecasts.
+ */
+export interface ConfidenceInterval {
+  /** Upper bound values aligned with prediction dates */
+  upper: number[];
+  /** Lower bound values aligned with prediction dates */
+  lower: number[];
+  /** Confidence level percentage (e.g., 95) */
+  level: number;
+}
+
+/**
+ * Revenue forecast data for predictive analytics.
+ */
+export interface RevenueForecast {
+  /** Historical actual revenue data */
+  historicalData: ForecastDataPoint[];
+  /** Predicted future revenue data */
+  predictions: ForecastDataPoint[];
+  /** Confidence interval bands for predictions */
+  confidenceInterval: ConfidenceInterval;
+  /** Current (most recent actual) revenue value */
+  currentValue: number;
+  /** Forecasted end-of-period revenue value */
+  forecastedEndValue: number;
+  /** Model accuracy metrics */
+  modelAccuracy?: {
+    mape: number; // Mean Absolute Percentage Error
+    rmse: number; // Root Mean Square Error
+  };
+}
+
+/**
+ * Individual customer at risk of churning.
+ */
+export interface AtRiskCustomer {
+  /** Unique customer identifier */
+  customerId: string;
+  /** Customer display name */
+  name: string;
+  /** Customer email */
+  email: string;
+  /** Current subscription plan */
+  plan: string;
+  /** Monthly Recurring Revenue from this customer */
+  mrr: number;
+  /** Churn risk score (0-1, where 1 is highest risk) */
+  riskScore: number;
+  /** Factors contributing to churn risk */
+  riskFactors: string[];
+  /** Days since last activity/engagement */
+  daysSinceActivity: number;
+  /** Predicted churn date (optional) */
+  predictedChurnDate?: string;
+}
+
+/**
+ * Summary of churn risk across customer base.
+ */
+export interface ChurnRiskSummary {
+  /** Total number of customers at risk */
+  totalAtRisk: number;
+  /** Breakdown by risk level */
+  byRiskLevel: {
+    high: number;
+    medium: number;
+    low: number;
+  };
+  /** Total MRR at risk of churning */
+  revenueAtRisk: number;
+  /** Average risk score across at-risk customers */
+  avgRiskScore: number;
+}
+
+/**
+ * Churn prediction data for predictive analytics.
+ */
+export interface ChurnPrediction {
+  /** List of customers at risk of churning */
+  atRiskCustomers: AtRiskCustomer[];
+  /** Summary statistics */
+  summary: ChurnRiskSummary;
+  /** Prediction model version/name */
+  modelVersion?: string;
+  /** When the prediction was generated */
+  generatedAt: string;
+}
+
+/**
+ * LTV projection curve data point.
+ */
+export interface LTVCurvePoint {
+  /** Month number (1, 2, 3, ...) */
+  month: number;
+  /** Projected LTV at this month */
+  ltv: number;
+}
+
+/**
+ * LTV by customer segment.
+ */
+export interface LTVSegmentBreakdown {
+  /** Segment name (e.g., "Enterprise", "Pro", "Starter") */
+  segment: string;
+  /** Average LTV for this segment */
+  ltv: number;
+  /** Percentage of total customer base */
+  percentage: number;
+}
+
+/**
+ * Factor contributing to LTV projection.
+ */
+export interface LTVFactor {
+  /** Factor name */
+  name: string;
+  /** Impact on LTV (positive or negative percentage) */
+  impact: number;
+  /** Description of the factor */
+  description: string;
+}
+
+/**
+ * LTV projection data for predictive analytics.
+ */
+export interface LTVProjection {
+  /** Current average LTV */
+  currentLTV: number;
+  /** Projected future LTV (12-month forecast) */
+  projectedLTV: number;
+  /** LTV projection curve over time */
+  projectionCurve: LTVCurvePoint[];
+  /** LTV breakdown by customer segment */
+  segmentBreakdown: LTVSegmentBreakdown[];
+  /** Factors contributing to the projection */
+  contributingFactors: LTVFactor[];
+  /** Projection confidence level */
+  confidenceLevel?: number;
+}
+
+/**
+ * Combined predictive analytics data.
+ */
+export interface PredictionsData {
+  /** Revenue forecast */
+  revenueForecast: RevenueForecast;
+  /** Churn risk prediction */
+  churnPrediction: ChurnPrediction;
+  /** LTV projection */
+  ltvProjection: LTVProjection;
+  /** When predictions were last generated */
+  lastGenerated: string;
+}
+
+// =============================================================================
 // LEGACY SOCIAL MEDIA TYPES
 // =============================================================================
 // Moved to ./analytics-legacy.ts for better code organization.

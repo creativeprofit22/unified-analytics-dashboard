@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { useAnalytics, useAlerts } from "@/hooks";
+import { useAnalytics, useAlerts, usePredictions } from "@/hooks";
 import { useFilters } from "@/contexts/FilterContext";
 import type { TimeRange, TrafficSource, CampaignChannel, ComparisonConfig } from "@/types/analytics";
 import { cn } from "@/utils/cn";
 import { TabNavigation, TabPanel, AlertPanel, type TabId } from "@/components";
+import { PredictionsPanel } from "@/components/predictions";
 import {
   TrafficSection,
   SEOSection,
@@ -52,6 +53,7 @@ export function Dashboard({ timeRange = "30d", comparison, className, syncHash =
   const { filters, setOptions, activeTab, setActiveTab } = useFilters();
   const { data, comparisonData, isLoading, error } = useAnalytics({ timeRange, filters, comparison });
   const { data: alertsData } = useAlerts();
+  const { data: predictionsData } = usePredictions();
 
   const handleTabChange = useCallback((tabId: TabId) => {
     setActiveTab(tabId);
@@ -115,6 +117,14 @@ export function Dashboard({ timeRange = "30d", comparison, className, syncHash =
             thresholdAlerts={alertsData.thresholdAlerts}
             goals={alertsData.goals}
           />
+        ) : (
+          <div className="animate-pulse h-48 rounded-lg bg-[var(--bg-secondary,rgba(255,255,255,0.05))]" />
+        )}
+      </TabPanel>
+
+      <TabPanel tabId="predictions" activeTab={activeTab} className="space-y-6">
+        {predictionsData ? (
+          <PredictionsPanel data={predictionsData} />
         ) : (
           <div className="animate-pulse h-48 rounded-lg bg-[var(--bg-secondary,rgba(255,255,255,0.05))]" />
         )}
