@@ -57,6 +57,15 @@ const statusConfig = {
   },
 } as const;
 
+type ThresholdStatus = keyof typeof statusConfig;
+
+function getStatusConfig(status: string) {
+  if (status in statusConfig) {
+    return statusConfig[status as ThresholdStatus];
+  }
+  return statusConfig.normal; // Fallback to normal for unknown status
+}
+
 // =============================================================================
 // HELPERS
 // =============================================================================
@@ -115,7 +124,7 @@ function formatRelativeTime(isoString: string): string {
 // =============================================================================
 
 function ThresholdAlertComponent({ alert }: ThresholdAlertProps) {
-  const status = statusConfig[alert.status];
+  const status = getStatusConfig(alert.status);
 
   return (
     <div

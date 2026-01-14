@@ -136,6 +136,9 @@ export default function HomePage() {
                 <a href="/dashboards" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
                   Custom Dashboards
                 </a>
+                <a href="/alerts" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+                  Alerts
+                </a>
               </nav>
             </div>
             <div className="flex items-center gap-3 flex-wrap">

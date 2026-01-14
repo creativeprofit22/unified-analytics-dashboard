@@ -1,9 +1,10 @@
 # Unified Analytics Dashboard
 
 ## Pipeline State
-Phase: build
-Feature: Wire Phase 3 Components to Pages
-Scope: Add pages/routes for Benchmarks, Custom Dashboards, and wire ExportDialog
+Phase: refactor-hunt
+Feature: Wire Phase 1 Alerting Components to Routes
+Files-Validated: src/app/alerts/page.tsx, src/app/page.tsx, src/components/alerts/*.tsx
+Validation-Report: reports/validation-phase1-alerting-wiring.md
 
 ## UI Roadmap
 
@@ -46,15 +47,15 @@ Scope: Add pages/routes for Benchmarks, Custom Dashboards, and wire ExportDialog
 - **Data Source Status** - Health check for GA4, Stripe, Search Console connections
 - **Multi-workspace** - Team/client separation with different permissions
 
-## Last Session (2026-01-13)
-**Feature**: Phase 3 - Advanced Features - VALIDATED
-- **3A Data Export**: CSV/JSON/Excel exporters, ExportDialog, ScheduledReports, API route
-- **3B Benchmark Comparisons**: industry-data.ts, BenchmarkComparison, BenchmarkPanel, API route
-- **3C Custom Dashboards**: widget-registry.ts, DashboardEditor, WidgetGrid, WidgetPicker, API route
-- Fixed: Division-by-zero in percentile calc, infinite loop guard in compaction, console.log placeholder
-- TypeCheck: PASS, Build: PASS, API: PASS, Wiring: PASS
-- Bottlenecks: 24 identified (deferred to refactor phase)
-- Validation Report: reports/validation-phase3-advanced-features.md
+## Last Session (2026-01-14)
+**Feature**: Wire Phase 1 Alerting Components to Routes - VALIDATED
+- Created /alerts page wired to AlertPanel, AnomalyCard, ThresholdAlert, GoalTracker
+- Added navigation link from main dashboard header
+- Verified alerts export from components/index.ts
+- Fixed 4 bugs: HTTP validation, raw fetch → useAlerts hook, status config fallbacks
+- Bottlenecks: 7 found, 1 fixed, 6 deferred to refactor phase
+- TypeCheck: PASS, API: PASS, UI: PASS, Wiring: PASS
+- Validation Report: reports/validation-phase1-alerting-wiring.md
 
 ## Previous Sessions
 - **Time Range UI Selector**: Built TimeRangePicker with presets (2026-01-12)

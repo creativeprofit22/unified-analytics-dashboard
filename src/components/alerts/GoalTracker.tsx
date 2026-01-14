@@ -64,6 +64,15 @@ const statusConfig = {
   },
 } as const;
 
+type GoalStatus = keyof typeof statusConfig;
+
+function getStatusConfig(status: string) {
+  if (status in statusConfig) {
+    return statusConfig[status as GoalStatus];
+  }
+  return statusConfig.on_track; // Fallback to on_track for unknown status
+}
+
 // =============================================================================
 // HELPERS
 // =============================================================================
@@ -115,7 +124,7 @@ function formatDaysRemaining(days: number): string {
 // =============================================================================
 
 function GoalTrackerComponent({ goal }: GoalTrackerProps) {
-  const status = statusConfig[goal.status];
+  const status = getStatusConfig(goal.status);
   const daysRemaining = getDaysRemaining(goal.endDate);
   const progressClamped = Math.min(Math.max(goal.progress, 0), 100);
 
