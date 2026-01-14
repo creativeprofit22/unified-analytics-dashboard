@@ -362,3 +362,28 @@ export type {
   ROIData,
   ROIResponse,
 } from "./roi";
+
+// =============================================================================
+// A/B TEST INTEGRATION TYPES
+// =============================================================================
+
+export type {
+  // Experiment Types
+  ExperimentStatus,
+  ABTestMetricType,
+  ConfidenceLevel,
+  // Variants
+  Variant,
+  VariantMetrics,
+  // Statistical Analysis
+  StatisticalSignificance,
+  VariantComparison,
+  // Experiments
+  ExperimentTrendPoint,
+  Experiment,
+  // Summary
+  ABTestSummary,
+  // Combined Data
+  ABTestData,
+  ABTestResponse,
+} from "./abtest";

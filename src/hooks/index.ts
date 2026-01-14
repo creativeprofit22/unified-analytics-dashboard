@@ -11,6 +11,7 @@ export { useAlerts, type UseAlertsReturn } from './useAlerts';
 export { usePredictions, type UsePredictionsReturn } from './usePredictions';
 export { useAttribution, type UseAttributionReturn } from './useAttribution';
 export { useROI, type UseROIReturn } from './useROI';
+export { useABTest, type UseABTestReturn } from './useABTest';
 
 // Shared utilities and types
 export {

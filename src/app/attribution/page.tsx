@@ -1,21 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { AttributionPanel, ROICalculator } from "@/components";
+import { AttributionPanel, ROICalculator, ABTestPanel } from "@/components";
 import { useAttribution } from "@/hooks/useAttribution";
 import { useROI } from "@/hooks/useROI";
+import { useABTest } from "@/hooks/useABTest";
 
 export default function AttributionPage() {
   const { data: attributionData, error: attributionError, isLoading: attributionLoading, refresh: refreshAttribution } = useAttribution();
   const { data: roiData, error: roiError, isLoading: roiLoading, refresh: refreshROI } = useROI();
+  const { data: abtestData, error: abtestError, isLoading: abtestLoading, refresh: refreshABTest } = useABTest();
 
   const handleRefresh = () => {
     refreshAttribution();
     refreshROI();
+    refreshABTest();
   };
 
-  const isLoading = attributionLoading || roiLoading;
-  const hasError = attributionError || roiError;
+  const isLoading = attributionLoading || roiLoading || abtestLoading;
+  const hasError = attributionError || roiError || abtestError;
 
   return (
     <main className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)]">
@@ -53,7 +56,7 @@ export default function AttributionPage() {
           </div>
         ) : hasError ? (
           <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-6 text-center">
-            <p className="text-red-400">{attributionError?.message || roiError?.message}</p>
+            <p className="text-red-400">{attributionError?.message || roiError?.message || abtestError?.message}</p>
             <button
               onClick={handleRefresh}
               className="mt-4 px-4 py-2 text-sm rounded-lg bg-red-500/20 hover:bg-red-500/30 transition-colors"
@@ -74,6 +77,13 @@ export default function AttributionPage() {
             {attributionData && (
               <section>
                 <AttributionPanel data={attributionData} />
+              </section>
+            )}
+
+            {/* A/B Test Section */}
+            {abtestData && (
+              <section>
+                <ABTestPanel data={abtestData} />
               </section>
             )}
           </>
