@@ -1,8 +1,8 @@
 "use client";
 
-import { ReactNode, useState, useCallback } from "react";
+import { ReactNode, useState, useCallback, useEffect } from "react";
 import Link from "next/link";
-import { DashboardEditor } from "@/components/dashboards";
+import { DashboardEditor, DashboardList, DashboardViewer } from "@/components/dashboards";
 import {
   PieChartWidget,
   LineChartWidget,
@@ -57,6 +57,7 @@ function renderWidget(widget: Widget): ReactNode {
 }
 
 const STORAGE_KEY = "unified-analytics-dashboards";
+const DEPLOYED_KEY = "unified-analytics-deployed-dashboards";
 
 function generateId(): string {
   return `dashboard-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -77,9 +78,36 @@ function saveDashboards(dashboards: SavedDashboard[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(dashboards));
 }
 
+function loadDeployedIds(): Set<string> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const stored = localStorage.getItem(DEPLOYED_KEY);
+    return new Set(stored ? JSON.parse(stored) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function saveDeployedIds(ids: Set<string>): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(DEPLOYED_KEY, JSON.stringify([...ids]));
+}
+
+type ViewMode = "list" | "editor" | "view";
+
 export default function DashboardsPage() {
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [dashboards, setDashboards] = useState<SavedDashboard[]>([]);
+  const [deployedIds, setDeployedIds] = useState<Set<string>>(new Set());
+  const [selectedDashboard, setSelectedDashboard] = useState<SavedDashboard | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [notification, setNotification] = useState<{ type: "success" | "error"; message: string } | null>(null);
+
+  // Load dashboards and deployed IDs on mount
+  useEffect(() => {
+    setDashboards(loadDashboards());
+    setDeployedIds(loadDeployedIds());
+  }, []);
 
   const showNotification = useCallback((type: "success" | "error", message: string) => {
     setNotification({ type, message });
@@ -89,10 +117,9 @@ export default function DashboardsPage() {
   const handleSave = useCallback((input: DashboardInput) => {
     setIsSaving(true);
 
-    // Simulate async save
     setTimeout(() => {
       try {
-        const dashboards = loadDashboards();
+        const currentDashboards = loadDashboards();
         const now = new Date().toISOString();
 
         const newDashboard: SavedDashboard = {
@@ -120,11 +147,13 @@ export default function DashboardsPage() {
           version: 1,
         };
 
-        dashboards.push(newDashboard);
-        saveDashboards(dashboards);
+        currentDashboards.push(newDashboard);
+        saveDashboards(currentDashboards);
+        setDashboards(currentDashboards);
 
         console.log("✅ Dashboard saved:", newDashboard.name, `(${newDashboard.widgetCount} widgets)`);
         showNotification("success", `Dashboard "${input.name}" created successfully!`);
+        setViewMode("list");
       } catch (error) {
         console.error("Failed to save dashboard:", error);
         showNotification("error", "Failed to save dashboard");
@@ -133,6 +162,53 @@ export default function DashboardsPage() {
       }
     }, 500);
   }, [showNotification]);
+
+  const handleView = useCallback((dashboard: SavedDashboard) => {
+    setSelectedDashboard(dashboard);
+    setViewMode("view");
+  }, []);
+
+  const handleEdit = useCallback((dashboard: SavedDashboard) => {
+    setSelectedDashboard(dashboard);
+    setViewMode("editor");
+  }, []);
+
+  const handleDeploy = useCallback((dashboardId: string) => {
+    const newDeployed = new Set(deployedIds);
+    newDeployed.add(dashboardId);
+    setDeployedIds(newDeployed);
+    saveDeployedIds(newDeployed);
+    const dashboard = dashboards.find(d => d.id === dashboardId);
+    showNotification("success", `"${dashboard?.name}" deployed to main page`);
+  }, [deployedIds, dashboards, showNotification]);
+
+  const handleUndeploy = useCallback((dashboardId: string) => {
+    const newDeployed = new Set(deployedIds);
+    newDeployed.delete(dashboardId);
+    setDeployedIds(newDeployed);
+    saveDeployedIds(newDeployed);
+    const dashboard = dashboards.find(d => d.id === dashboardId);
+    showNotification("success", `"${dashboard?.name}" removed from main page`);
+  }, [deployedIds, dashboards, showNotification]);
+
+  const handleDelete = useCallback((dashboardId: string) => {
+    const newDashboards = dashboards.filter(d => d.id !== dashboardId);
+    saveDashboards(newDashboards);
+    setDashboards(newDashboards);
+    // Also remove from deployed if it was deployed
+    if (deployedIds.has(dashboardId)) {
+      const newDeployed = new Set(deployedIds);
+      newDeployed.delete(dashboardId);
+      setDeployedIds(newDeployed);
+      saveDeployedIds(newDeployed);
+    }
+    showNotification("success", "Dashboard deleted");
+  }, [dashboards, deployedIds, showNotification]);
+
+  const handleBack = useCallback(() => {
+    setViewMode("list");
+    setSelectedDashboard(null);
+  }, []);
 
   return (
     <div className="h-screen flex flex-col bg-[var(--bg-primary)] text-[var(--text-primary)]">
@@ -149,21 +225,106 @@ export default function DashboardsPage() {
         </div>
       )}
 
-      <header className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-color,rgba(255,255,255,0.1))]">
-        <h1 className="text-xl font-semibold">Custom Dashboards</h1>
-        <Link
-          href="/"
-          className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
-        >
-          &larr; Back
-        </Link>
-      </header>
-      <DashboardEditor
-        renderWidget={renderWidget}
-        onSave={handleSave}
-        isSaving={isSaving}
-        className="flex-1"
-      />
+      {viewMode === "list" && (
+        <>
+          <header className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-color,rgba(255,255,255,0.1))]">
+            <div>
+              <h1 className="text-xl font-semibold">Custom Dashboards</h1>
+              <p className="text-sm text-[var(--text-secondary)] mt-1">
+                {dashboards.length} dashboard{dashboards.length !== 1 ? "s" : ""} • {deployedIds.size} deployed
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setViewMode("editor")}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                New Dashboard
+              </button>
+              <Link
+                href="/"
+                className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+              >
+                &larr; Back
+              </Link>
+            </div>
+          </header>
+          <div className="flex-1 overflow-auto p-6">
+            <DashboardList
+              dashboards={dashboards}
+              deployedIds={deployedIds}
+              onView={handleView}
+              onEdit={handleEdit}
+              onDeploy={handleDeploy}
+              onUndeploy={handleUndeploy}
+              onDelete={handleDelete}
+            />
+          </div>
+        </>
+      )}
+
+      {viewMode === "editor" && (
+        <>
+          <header className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-color,rgba(255,255,255,0.1))]">
+            <h1 className="text-xl font-semibold">
+              {selectedDashboard ? `Edit: ${selectedDashboard.name}` : "New Dashboard"}
+            </h1>
+            <button
+              onClick={handleBack}
+              className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              &larr; Back to List
+            </button>
+          </header>
+          <DashboardEditor
+            initialDashboard={selectedDashboard}
+            renderWidget={renderWidget}
+            onSave={handleSave}
+            onClose={handleBack}
+            isSaving={isSaving}
+            className="flex-1"
+          />
+        </>
+      )}
+
+      {viewMode === "view" && selectedDashboard && (
+        <>
+          <header className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-color,rgba(255,255,255,0.1))]">
+            <div>
+              <h1 className="text-xl font-semibold">{selectedDashboard.name}</h1>
+              {selectedDashboard.description && (
+                <p className="text-sm text-[var(--text-secondary)] mt-1">{selectedDashboard.description}</p>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => handleEdit(selectedDashboard)}
+                className="flex items-center gap-2 px-3 py-2 rounded-lg border border-[var(--border-color)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Edit
+              </button>
+              <button
+                onClick={handleBack}
+                className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+              >
+                &larr; Back to List
+              </button>
+            </div>
+          </header>
+          <div className="flex-1 overflow-auto">
+            <DashboardViewer
+              dashboard={selectedDashboard}
+              renderWidget={renderWidget}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }
