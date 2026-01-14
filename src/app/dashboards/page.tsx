@@ -9,6 +9,13 @@ import {
   BarChartWidget,
   AreaChartWidget,
   MetricCardWidget,
+  FunnelChartWidget,
+  GaugeChartWidget,
+  HeatmapWidget,
+  RadarChartWidget,
+  SankeyChartWidget,
+  ScatterChartWidget,
+  TableWidget,
 } from "@/components/dashboards/charts";
 import type { Widget } from "@/types/custom-dashboards";
 
@@ -26,17 +33,20 @@ function renderWidget(widget: Widget): ReactNode {
       return <PieChartWidget widget={widget} />;
     case "area-chart":
       return <AreaChartWidget widget={widget} />;
+    case "funnel-chart":
+      return <FunnelChartWidget widget={widget} />;
+    case "gauge-chart":
+      return <GaugeChartWidget widget={widget} />;
+    case "heatmap":
+      return <HeatmapWidget widget={widget} />;
+    case "radar-chart":
+      return <RadarChartWidget widget={widget} />;
+    case "sankey-chart":
+      return <SankeyChartWidget widget={widget} />;
+    case "scatter-chart":
+      return <ScatterChartWidget widget={widget} />;
     case "table":
-      return (
-        <div className={baseStyle}>
-          <div className="text-center text-[var(--text-secondary)]">
-            <svg className="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
-            <div className="text-sm">{widget.title}</div>
-          </div>
-        </div>
-      );
+      return <TableWidget widget={widget} />;
     default:
       return (
         <div className={baseStyle}>
