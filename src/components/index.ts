@@ -35,3 +35,6 @@ export * from "./notifications";
 
 // Export
 export * from "./export";
+
+// Predictions & Forecasting
+export * from "./predictions";

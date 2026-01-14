@@ -139,6 +139,9 @@ export default function HomePage() {
                 <a href="/alerts" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
                   Alerts
                 </a>
+                <a href="/predictions" className="text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+                  Predictions
+                </a>
               </nav>
             </div>
             <div className="flex items-center gap-3 flex-wrap">
